@@ -100,7 +100,6 @@ const useToolbarStyles = makeStyles(theme => ({
 const EnhancedTableToolbar = props => {
   const classes = useToolbarStyles();
   const { numSelected } = props;
-  const addCategoryShow = props.onAddClick;
   return (
     <Toolbar
       className={clsx(classes.root, {
@@ -168,7 +167,14 @@ export function PrescriptionBarcodeDetailes(props) {
   const [inSrch, setInSrch] = React.useState(false);
   const [isEditingOrDeletingOneOrAdding, setIsEditingOrDeletingOneOrAdding] = React.useState(false);
   const [isDeletingGroup, setIsDeletingGroup] = React.useState(false);
-
+  const [searchModel,setSearchModel] = React.useState({
+    PatientNationalCode:'',
+    PharmacyGln:'',
+    MedicalCouncilNumber:'',
+    UID:'',
+    CreatedDate:'',
+    TrackingCode:''
+  })
   const setFakeData = (count) => {
     const temp = [];
     for (let i = 0; i < count; i++) {
@@ -177,6 +183,7 @@ export function PrescriptionBarcodeDetailes(props) {
     setRows(temp);
   }
 
+  const notifySuccess = ()=>toast('عملیات با موفقیت انجام گردید.',{duration:toastConfig.duration,style:toastConfig.successStyle});
   const notifyError = () => toast('خطا در ارتباط با سرور. اطلاعات بارگزاری نشد.', { duration: toastConfig.duration, style: toastConfig.errorStyle });
 
   const getData = (nRows, page, title, inSearch, iseditingORdeletingORadding, isdeletinggroup) => {
@@ -302,27 +309,32 @@ export function PrescriptionBarcodeDetailes(props) {
     getData(event.target.value, 1, srchTitle, false, false, false);
   }
 
-  function setKeyUpSrch(e) {
-    if (isEditingOrDeletingOneOrAdding)
-      return;
-    setSrchTitle(e.target.value);
-    setInSrch(true);
-    setPage(0);
-    getData(rowsPerPage, 1, e.target.value, true, false, false);
-  }
-
   function addCategoryShow() {
     props.showAddFunction();
   }
-  function editCategoryShow(e) {
-    let id = e.currentTarget.getAttribute('dbid');
-    let title = e.currentTarget.getAttribute('title');
-    let desc = e.currentTarget.getAttribute('description');
-    props.showEditFunction({ id: id, title: title, description: desc });
-  }
 
-  function issueDateOnSubmit(e){
-    console.log(e);
+  function getData2(nRows, page){
+    var modelData = searchModel;
+    console.log("model",modelData);
+    axios.post('api',modelData).then((response)=>{
+      let result = response.data.lstPrescriptionActivityRow;
+      setCount(response.data.LstCount);
+      let temp = [];
+      for (let i = 0; i < nRows * (page - 1); i++) {
+        temp.push({});
+      }
+      result.forEach(item => {
+        temp.push(createData(item.id, item.title, item.code, item.description == null ? '' : item.description, item.createdDate));
+      });
+      setRows(temp);
+      setIsLoading(false);
+      notifySuccess();
+    }).catch((error)=>{
+      notifyError();
+    })
+  }
+  function searchBtn(e){
+    getData2(rowsPerPage, page + 1);
   }
   const isSelected = id => selected.indexOf(id) !== -1;
 
@@ -347,29 +359,29 @@ export function PrescriptionBarcodeDetailes(props) {
                 <Row>
                     <Col md='2'>
                       <Form.Label className='custom-label marg-t-20 bold'>کد ملی</Form.Label>
-                      <Form.Control  className='form-control-custom' as="input" />
+                      <Form.Control onChange={(e)=>setSearchModel({...searchModel,PatientNationalCode:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
                     <Col md='2'>
                       <Form.Label className='custom-label marg-t-20 bold'>GIN داروخانه</Form.Label>
-                      <Form.Control  className='form-control-custom' as="input" />
+                      <Form.Control onChange={(e)=>setSearchModel({...searchModel,PharmacyGln:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
                     <Col md='2'>
                       <Form.Label className='custom-label marg-t-20 bold'>نظام پزشکی</Form.Label>
-                      <Form.Control  className='form-control-custom' as="input" />
+                      <Form.Control onChange={(e)=>setSearchModel({...searchModel,MedicalCouncilNumber:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
                     <Col md='4'>
                       <Form.Label className='custom-label marg-t-20 bold'>کد اصالت </Form.Label>
-                      <Form.Control  className='form-control-custom' as="input" />
+                      <Form.Control onChange={(e)=>setSearchModel({...searchModel,UID:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
                 </Row>
                 <Row>
                     <Col md='2'>
                       <Form.Label className='custom-label marg-t-20 bold'>تاریخ ثبت از</Form.Label>
-                      <DatePickerComponent selectedDate={moment().format('jYYYY-jMM-jDD')} onChange={issueDateOnSubmit}></DatePickerComponent>
+                      <DatePickerComponent selectedDate={moment().format('jYYYY-jMM-jDD')} onChange={(e)=>setSearchModel({...searchModel,CreatedDate:e})}></DatePickerComponent>
                     </Col>
                     <Col md='6'>
                       <Form.Label className='custom-label marg-t-20 bold'>ترکینگ آیدی</Form.Label>
-                      <Form.Control  className='form-control-custom' as="input" />
+                      <Form.Control onChange={(e)=>setSearchModel({...searchModel,TrackingCode:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
                 </Row>
 
@@ -377,7 +389,7 @@ export function PrescriptionBarcodeDetailes(props) {
                 <Row>
                     <Col md='2'>
                     <Form.Label className='custom-label marg-t-20 bold'></Form.Label>
-                      <Button>جستجو کد اصالت</Button>
+                      <Button onClick={searchBtn}>جستجو کد اصالت</Button>
                     </Col>
                 </Row>
               </FormGroup>
