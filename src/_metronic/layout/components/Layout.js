@@ -22,7 +22,7 @@ export function Layout({ children }) {
             layoutConfig: uiService.config,
             selfLayout: objectPath.get(uiService.config, "self.layout"),
             asideDisplay: objectPath.get(uiService.config, "aside.self.display"),
-            subheaderDisplay: objectPath.get(uiService.config, "subheader.display"),
+            subheaderDisplay: objectPath.get(uiService.config, "subheader.none"),
             desktopHeaderDisplay: objectPath.get(
                 uiService.config,
                 "header.self.fixed.desktop"

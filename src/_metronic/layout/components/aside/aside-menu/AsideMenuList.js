@@ -3,17 +3,7 @@ import React from "react";
 import {useLocation} from "react-router";
 import {NavLink}  from "react-router-dom";
 import SVG from "react-inlinesvg";
-import {stockroomManagePath
-    ,categoryPath
-    ,balancestocManagePath
-    ,usersPath
-    ,processDefinitionPath
-    ,processPath
-    ,processListPath
-    ,flowProcessAddPath
-    ,flowProcessListPath
-    ,CostCateogryPath
-    ,CostListPath
+import {PrescriptionBarcodeDetailesPath
 } from '../../../../../app/pages/commonConstants/RouteConstant';
 import {toAbsoluteUrl, checkIsActive} from "../../../../_helpers";
 export function AsideMenuList({ layoutProps }) {
@@ -33,19 +23,7 @@ export function AsideMenuList({ layoutProps }) {
             <h4 className="menu-text">منو کاری</h4>
             <i className="menu-icon flaticon-more-v2"></i>
           </li>
-          {/* end:: section */}
-          <li
-              className={`menu-item ${getMenuItemActive({categoryPath})}`}
-              aria-haspopup="true">
-              <NavLink className="menu-link" to={categoryPath}>
-                  <span className="svg-icon menu-icon">
-                      <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Layers.svg")}/>
-                  </span>
-                  <span className="menu-text">دسته بندی ها</span>
-              </NavLink>
-          </li>
-            
-                        {/* Inputs */}
+
             {/*begin::2 Level*/}
             <li
                 className={`menu-item menu-item-submenu ${getMenuItemActive(
@@ -58,7 +36,7 @@ export function AsideMenuList({ layoutProps }) {
                 <i className="menu-bullet menu-bullet-dot">
                     <span/>
                 </i>
-                <span className="menu-text">فرایند</span>
+                <span className="menu-text">سازمان غذا و دارو</span>
                 <i className="menu-arrow"/>
                 </NavLink>
                 <div className="menu-submenu ">
@@ -68,25 +46,13 @@ export function AsideMenuList({ layoutProps }) {
 
                     {/*begin::3 Level*/}
                     <li
-                        className={`menu-item ${getMenuItemActive({processPath})}`}
+                        className={`menu-item ${getMenuItemActive({PrescriptionBarcodeDetailesPath})}`}
                         aria-haspopup="true">
-                        <NavLink className="menu-link" to={processPath}>
+                        <NavLink className="menu-link" to={PrescriptionBarcodeDetailesPath}>
                             <span className="svg-icon menu-icon">
                                 <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Layers.svg")}/>
                             </span>
-                            <span className="menu-text">تعریف فرایند</span>
-                        </NavLink>
-                    </li>
-                    {/*end::3 Level*/}
-                    {/*begin::3 Level*/}
-                    <li
-                        className={`menu-item ${getMenuItemActive({processListPath})}`}
-                        aria-haspopup="true">
-                        <NavLink className="menu-link" to={processListPath}>
-                            <span className="svg-icon menu-icon">
-                                <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Layers.svg")}/>
-                            </span>
-                            <span className="menu-text">مدیریت فرایندها</span>
+                            <span className="menu-text">اصالت دارو</span>
                         </NavLink>
                     </li>
                     {/*end::3 Level*/}
@@ -94,20 +60,6 @@ export function AsideMenuList({ layoutProps }) {
                 </div>
             </li>
             {/*end::2 Level*/}
-
-
-
-            <li
-              className={`menu-item ${getMenuItemActive({usersPath})}`}
-              aria-haspopup="true">
-              <NavLink className="menu-link" to={usersPath}>
-                  <span className="svg-icon menu-icon">
-                      <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Layers.svg")}/>
-                  </span>
-                  <span className="menu-text">کاربران</span>
-              </NavLink>
-          </li>
-          {/*end::1 Level*/}
         </ul>
 
         {/* end::Menu Nav */}

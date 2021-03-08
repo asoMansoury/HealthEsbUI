@@ -6,34 +6,32 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
-import {Badge} from '@material-ui/core'
-import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip  from '@material-ui/core/Tooltip'
 import '../pulseDesignStyles/pulseDesignStyles.scss';
 import { Form, Row, Col, Button,FormGroup } from 'react-bootstrap';
 import Skeleton from 'react-loading-skeleton';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { faIR } from '@material-ui/core/locale';
-import ModalDeleteGroup from './Components/ModalDeleteGroup';
-import {GeneralParamterSearchApi} from '../commonConstants/ApiConstants'
+import {GetPrescriptionActivityApi} from '../commonConstants/apiUrls'
 import ModalDescription from './Components/ModalDescription';
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect } from 'react';
 import axios from 'axios';
 import {CardComponent} from '../component/UI/CardComponent'
-import { Preloader, Oval } from 'react-preloader-icon';
 import { tableConfig } from '../Config';
 import toast, { Toaster } from 'react-hot-toast';
 import { toastConfig } from '../Config';
 import EnhancedTableHead from '../component/UI/EnhancedTableHead';
-import {Notice} from "../../../_metronic/_partials/controls";
 import {DatePickerComponent} from '../component/DatePickerComponent/DatePickerComponent';
 import moment from 'moment-jalaali';
 
-function createData(id, title, code, description, createDate) {
-  return { id, title, code, description, createDate };
+function createData(rowNumber, patientNationalCode, patientGivenName, patientSurname, 
+                  medicalCouncilNumber,physicianSurname,pharmacyGln,createdDate,status,
+                  statusMessage) {
+  var fullName = patientGivenName+' '+patientSurname;
+  createdDate=moment(createdDate).format('jYYYY-jMM-jDD HH:mm:ss');
+  return { rowNumber, patientNationalCode, fullName, medicalCouncilNumber, physicianSurname,pharmacyGln,createdDate,
+          status,statusMessage };
 }
 
 function desc(a, b, orderBy) {
@@ -61,7 +59,7 @@ function getSorting(order, orderBy) {
 }
 
 const headRows = [
-  { id: 'id', numeric: true, disablePadding: true, label: 'شناسه' },
+  { id: 'id', numeric: true, disablePadding: true, label: '#' },
   { id: 'title', numeric: false, disablePadding: true, label: 'کدملی' },
   { id: 'description', numeric: false, disablePadding: false, label: 'نام بیمار' },
   { id: 'createDate', numeric: false, disablePadding: false, label: 'کد نظام' },
@@ -73,54 +71,6 @@ const headRows = [
   { id: 'createDate', numeric: false, disablePadding: false, label: 'زمان پاسخ' },
   { id: 'createDate', numeric: false, disablePadding: false, label: 'عملیات' },
 ];
-
-const useToolbarStyles = makeStyles(theme => ({
-  root: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(1),
-  },
-  highlight:
-    theme.palette.type === 'light'
-      ? {
-        color: '#8950FC',
-        backgroundColor: '#f3f6f9',
-      }
-      : {
-        color: '#8950FC',
-        backgroundColor: '#f3f6f9',
-      },
-  spacer: {
-    flex: '1 1 100%',
-  },
-  title: {
-    flex: '0 0 auto',
-  },
-}));
-
-const EnhancedTableToolbar = props => {
-  const classes = useToolbarStyles();
-  const { numSelected } = props;
-  return (
-    <Toolbar
-      className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0,
-      })}
-    >
-      <div className={classes.title}>
-        {numSelected > 0 ? (
-          <Typography color="inherit" variant="subtitle1">
-            {numSelected} مورد انتخاب شده است
-          </Typography>
-        ) : (
-            <Typography variant="h6" id="tableTitle">
-              <span className='tabelhead'>لیست دسته بندی ها</span>
-            </Typography>
-          )}
-      </div>
-      <div className={classes.spacer} />
-    </Toolbar>
-  );
-};
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -138,6 +88,9 @@ const useStyles = makeStyles(theme => ({
   tableWrapper: {
     overflowX: 'auto',
   },
+  cell_short: {
+    fontSize: "10px !important"
+  }
 }));
 const theme = createMuiTheme({
   direction: 'rtl',
@@ -151,8 +104,8 @@ const theme = createMuiTheme({
   },
 }, faIR);
 
-export function PrescriptionBarcodeDetailes(props) {
 
+export function PrescriptionBarcodeDetailes(props) {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('id');
@@ -188,7 +141,7 @@ export function PrescriptionBarcodeDetailes(props) {
 
   const getData = (nRows, page, title, inSearch, iseditingORdeletingORadding, isdeletinggroup) => {
 
-    axios.get(GeneralParamterSearchApi + '?Title=' + title + '&ParentCode=0003&Page=' + page + '&Row=' + nRows+'&sort=date:desc')
+    axios.get('GeneralParamterSearchApi' + '?Title=' + title + '&ParentCode=0003&Page=' + page + '&Row=' + nRows+'&sort=date:desc')
       .then(res => {
         let result = res.data.generalParamterDtos;
         setCount(res.data.numberRows);
@@ -233,7 +186,7 @@ export function PrescriptionBarcodeDetailes(props) {
   });
   useEffect(() => {
     setFakeData(tableConfig.rowsPerPageDefault);
-    getData(tableConfig.rowsPerPageDefault, 1, '', false, false, false);
+    getData2();
   }, []);
   useEffect(() => {
     if (props.Is_Edited || props.Is_Deleted_One || props.Is_Added) {
@@ -261,35 +214,6 @@ export function PrescriptionBarcodeDetailes(props) {
     setOrderBy(property);
   }
 
-  function handleSelectAllClick(event) {
-    if (event.target.checked) {
-      const newSelecteds = rows.map(n => n.id);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  }
-
-  function handleClick(event, id) {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
-  }
-
   function handleChangePage(event, newPage) {
     if (isLoading)
       return;
@@ -309,22 +233,34 @@ export function PrescriptionBarcodeDetailes(props) {
     getData(event.target.value, 1, srchTitle, false, false, false);
   }
 
-  function addCategoryShow() {
-    props.showAddFunction();
-  }
-
-  function getData2(nRows, page){
+  function getData2(){
     var modelData = searchModel;
-    console.log("model",modelData);
-    axios.post('api',modelData).then((response)=>{
+    var data = {
+      pageNum: page+1,
+      pageSize: rowsPerPage,
+      isRequestCount: false
+    }
+    setIsLoading(true)
+    axios.post(GetPrescriptionActivityApi,data).then((response)=>{
       let result = response.data.lstPrescriptionActivityRow;
-      setCount(response.data.LstCount);
+      console.log(result);
+      setCount(response.data.lstCount);
       let temp = [];
-      for (let i = 0; i < nRows * (page - 1); i++) {
+      for (let i = 0; i < rowsPerPage * (page - 1); i++) {
         temp.push({});
       }
       result.forEach(item => {
-        temp.push(createData(item.id, item.title, item.code, item.description == null ? '' : item.description, item.createdDate));
+        temp.push(createData(item.id, 
+          item.patientNationalCode, 
+          item.patientGivenName, 
+          item.patientSurname, 
+          item.medicalCouncilNumber,
+          item.physicianSurname,
+          item.pharmacyGln,
+          item.createdDate,
+          item.status,
+          item.statusMessage
+          ));
       });
       setRows(temp);
       setIsLoading(false);
@@ -333,8 +269,9 @@ export function PrescriptionBarcodeDetailes(props) {
       notifyError();
     })
   }
+
   function searchBtn(e){
-    getData2(rowsPerPage, page + 1);
+    getData2();
   }
   const isSelected = id => selected.indexOf(id) !== -1;
 
@@ -342,19 +279,9 @@ export function PrescriptionBarcodeDetailes(props) {
 
   return (
     <>
-      <Notice icon="flaticon-warning font-primary">
-        <span>
-          در صورتی که نیاز به توضیحات است اینجا وارد شود.
-        </span>{" "}
-        <span>
-          جستجو بر اساس اصالت دارو{" "}
-        </span>
-      </Notice>
-
-
       <div className="row">
         <div className="col-md-12">
-          <CardComponent beforeCodeTitle="جسستجو بر اساس...">
+          <CardComponent>
               <FormGroup>
                 <Row>
                     <Col md='2'>
@@ -383,11 +310,7 @@ export function PrescriptionBarcodeDetailes(props) {
                       <Form.Label className='custom-label marg-t-20 bold'>ترکینگ آیدی</Form.Label>
                       <Form.Control onChange={(e)=>setSearchModel({...searchModel,TrackingCode:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
-                </Row>
-
-                <div className="separator separator-dashed my-7"></div>
-                <Row>
-                    <Col md='2'>
+                    <Col md='2'  style={{marginTop: '40px'}}>
                     <Form.Label className='custom-label marg-t-20 bold'></Form.Label>
                       <Button onClick={searchBtn}>جستجو کد اصالت</Button>
                     </Col>
@@ -398,33 +321,20 @@ export function PrescriptionBarcodeDetailes(props) {
       </div>
 
     <div className={classes.root}>
+      <CardComponent>
       <ThemeProvider theme={theme}>
         <Paper className={classes.paper}>
-          <EnhancedTableToolbar numSelected={selected.length} selected={selected} onAddClick={addCategoryShow} />
-          <Row className='marg-t-10'>
-            <Col md='4'>
-              <div className='preloader-cat-list' style={{ display: (inSrch || isEditingOrDeletingOneOrAdding) ? 'flex' : 'none' }}>
-                <Preloader
-                  use={Oval}
-                  size={30}
-                  strokeWidth={8}
-                  strokeColor="#8950FC"
-                  duration={500}
-                />
-              </div>
-            </Col>
-          </Row>
-          <div className={classes.tableWrapper}>
+        <div className={classes.tableWrapper}>
             <Table
               className={classes.table + ' marg-t-10'}
               aria-labelledby="tableTitle"
               size={dense ? 'small' : 'medium'}
             >
               <EnhancedTableHead
+
                 numSelected={selected.length}
                 order={order}
                 orderBy={orderBy}
-                onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
                 rowCount={rows.length}
                 headRows={headRows}
@@ -439,83 +349,75 @@ export function PrescriptionBarcodeDetailes(props) {
                     return (
                       <>
                         <TableRow
+
                           hover
-                          role="checkbox"
-                          aria-checked={isItemSelected}
                           tabIndex={-1}
                           key={row.id}
-                          selected={isItemSelected}
                         >
-                          <TableCell  padding="checkbox">
-                            <Checkbox
-                              onClick={event => handleClick(event, row.id)}
-                              checked={isItemSelected}
-                              inputProps={{ 'aria-labelledby': labelId }}
-                            />
-                          </TableCell>
-                          <TableCell padding="none" size='small' align="right">
+                          <TableCell className={classes.cell_short} padding="none" size='small' align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              {row.id}
+                              {row.rowNumber}
                             </div>
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              {row.title}
+                              {row.patientNationalCode}
                             </div>
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none',fontSize: '10px !important'  }}>
-                              {row.title}
+                              {row.fullName}
                             </div>
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              {row.title}
+                              {row.medicalCouncilNumber}
                             </div>
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              {row.title}
+                              {row.physicianSurname}
                             </div>
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              {row.title}
+                              {row.pharmacyGln}
                             </div>
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
+                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
+                              <div className='create-date'>{row.createdDate}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className={classes.cell_short} align="right">
+                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
+                              <div className='create-date'>{row.status}</div>
+                            </div>
+                            <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
+                          </TableCell>
+                          <TableCell className={classes.cell_short} align="right">
+                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
+                            {row.statusMessage}                            
+                            {/* <Tooltip title={row.statusMessage}>
+                              <span style={{fontSize:'16px'}}>{row.statusMessage!=undefined?row.statusMessage.substring(0,row.statusMessage.length-20):''}</span>
+                            </Tooltip> */}
+                            </div>
+                            <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
+                          </TableCell>
+                          <TableCell className={classes.cell_short} align="right">
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
                               <div className='create-date'>{row.createDate}</div>
                             </div>
-                          </TableCell>
-                          <TableCell align="right">
-                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              <div className='create-date'>{row.createDate}</div>
-                            </div>
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                           </TableCell>
-                          <TableCell align="right">
-                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                            <Tooltip title='hello'>
-                              <span>نتیجه داروی 1</span>
-                            </Tooltip>
-                            </div>
-                            <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
-                          </TableCell>
-                          <TableCell align="right">
-                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              <div className='create-date'>{row.createDate}</div>
-                            </div>
-                            <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
-                          </TableCell>
-                          <TableCell align="right">
+                          <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
                             <ModalDescription dbid={row.id} title="جزئیات" headerTitle="جزئیات" name={row.title} text={row.description} />
@@ -553,8 +455,9 @@ export function PrescriptionBarcodeDetailes(props) {
         </Paper>
       </ThemeProvider>
       <Toaster position={toastConfig.position} />
+      </CardComponent>
     </div>
-
+  
     </>
   );
 }

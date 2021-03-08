@@ -52,7 +52,7 @@ export function CardComponent({
 
   return (
     <Card className="example example-compact"  style={{border: '2px solid #1bc5bd'}}>
-      <CardHeader title={beforeCodeTitle} toolbar={toolbar} style={{background:'#e4e6ef'}}/>
+      {/* <CardHeader title={beforeCodeTitle} toolbar={toolbar} style={{background:'#e4e6ef'}}/> */}
       <CardBody >
         <>{children}</>
         <KTCodeBlock
@@ -62,7 +62,7 @@ export function CardComponent({
           customStyle={customStyle}
         />
       </CardBody>
-      <CardFooter></CardFooter>
+      {/* <CardFooter></CardFooter> */}
     </Card>
   );
 }
