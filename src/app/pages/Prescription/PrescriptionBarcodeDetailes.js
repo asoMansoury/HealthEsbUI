@@ -111,15 +111,10 @@ export function PrescriptionBarcodeDetailes(props) {
   const [orderBy, setOrderBy] = React.useState('id');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(tableConfig.rowsPerPageDefault);
   const [isLoading, setIsLoading] = React.useState(true);
   const [rows, setRows] = React.useState([]);
-  const [srchTitle, setSrchTitle] = React.useState('');
   const [count, setCount] = React.useState(0);
-  const [inSrch, setInSrch] = React.useState(false);
-  const [isEditingOrDeletingOneOrAdding, setIsEditingOrDeletingOneOrAdding] = React.useState(false);
-  const [isDeletingGroup, setIsDeletingGroup] = React.useState(false);
   const [searchModel,setSearchModel] = React.useState({
     PatientNationalCode:'',
     PharmacyGln:'',
@@ -139,59 +134,17 @@ export function PrescriptionBarcodeDetailes(props) {
   const notifySuccess = ()=>toast('عملیات با موفقیت انجام گردید.',{duration:toastConfig.duration,style:toastConfig.successStyle});
   const notifyError = () => toast('خطا در ارتباط با سرور. اطلاعات بارگزاری نشد.', { duration: toastConfig.duration, style: toastConfig.errorStyle });
 
-  const getData = (nRows, page, title, inSearch, iseditingORdeletingORadding, isdeletinggroup) => {
-
-    axios.get('GeneralParamterSearchApi' + '?Title=' + title + '&ParentCode=0003&Page=' + page + '&Row=' + nRows+'&sort=date:desc')
-      .then(res => {
-        let result = res.data.generalParamterDtos;
-        setCount(res.data.numberRows);
-        let temp = [];
-        for (let i = 0; i < nRows * (page - 1); i++) {
-          temp.push({});
-        }
-        result.forEach(item => {
-          temp.push(createData(item.id, item.title, item.code, item.description == null ? '' : item.description, item.createdDate));
-        });
-        setRows(temp);
-        setIsLoading(false);
-
-        if (inSearch) {
-          setTimeout(() => {
-            setInSrch(false);
-          }, 1000);
-        }
-        if (iseditingORdeletingORadding) {
-          setTimeout(() => {
-            setIsEditingOrDeletingOneOrAdding(false);
-          }, 1000);
-        }
-        if (isdeletinggroup) {
-          setTimeout(() => {
-            setIsDeletingGroup(false);
-          }, 1000);
-        }
-      })
-      .catch(error => {
-        // console.log(error);
-        notifyError();
-        setIsLoading(true);
-        setIsEditingOrDeletingOneOrAdding(false);
-        setInSrch(false);
-        setIsDeletingGroup(false);
-      });
-  }
   useEffect(() => {
     let paginationArrows = Array.from(document.getElementsByTagName('div')).find(x => x.className.includes('MuiTablePagination-actions'));
     paginationArrows.style.position = 'absolute';
   });
   useEffect(() => {
     setFakeData(tableConfig.rowsPerPageDefault);
-    getData2();
+    getSearchResult();
   }, []);
   useEffect(() => {
     if (props.Is_Edited || props.Is_Deleted_One || props.Is_Added) {
-      setIsEditingOrDeletingOneOrAdding(true);
-      getData(rowsPerPage, page + 1, srchTitle, false, true, false);
+      getSearchResult();
       props.notEdited();
       props.notDeletedOne();
       props.notAdded();
@@ -199,9 +152,8 @@ export function PrescriptionBarcodeDetailes(props) {
         setSelected([]);
     }
     else if (props.Is_Deleted_Group) {
-      setIsDeletingGroup(true);
       setIsLoading(true);
-      getData(rowsPerPage, 1, '', false, false, true);
+      getSearchResult();
       props.notDeletedGroup();
       setPage(0);
       setSelected([]);
@@ -220,7 +172,7 @@ export function PrescriptionBarcodeDetailes(props) {
     setFakeData(count);
     setIsLoading(true);
     setPage(newPage);
-    getData(rowsPerPage, newPage + 1, srchTitle, false, false, false);
+    getSearchResult();
   }
 
   function handleChangeRowsPerPage(event) {
@@ -230,17 +182,77 @@ export function PrescriptionBarcodeDetailes(props) {
     setIsLoading(true);
     setRowsPerPage(event.target.value);
     setPage(0);
-    getData(event.target.value, 1, srchTitle, false, false, false);
+    getSearchResult();
   }
 
-  function getData2(){
-    var modelData = searchModel;
+  function getSearchModel(){
+    var model = searchModel;
+    var rules=[];
+    if(model.PatientNationalCode!=='')
+    {
+      var obj = {
+        field:'PatientNationalCode',
+        op:11,
+        data:model.PatientNationalCode
+      }
+      rules.push(obj);
+    }
+    if(model.PharmacyGln!=''){
+      var obj = {
+        field:"PharmacyGln",
+        op:11,
+        data:model.PharmacyGln
+      }
+      rules.push(obj);
+    }
+    if(model.MedicalCouncilNumber!=''){
+      var obj = {
+        field:"MedicalCouncilNumber",
+        op:11,
+        data:model.MedicalCouncilNumber
+      }
+      rules.push(obj);
+    }
+    if(model.CreatedDate!=''){
+      var obj = {
+        field:"CreatedDate",
+        op:11,
+        data:model.CreatedDate
+      }
+      rules.push(obj);
+    }
+    if(model.TrackingCode!=''){
+      var obj = {
+        field:"TrackingCode",
+        op:11,
+        data:model.TrackingCode
+      }
+      rules.push(obj);
+    }
+    if(model.UID!=''){
+      var obj = {
+        field:"Uid",
+        op:11,
+        data:model.UID
+      }
+      rules.push(obj);
+    }
+    var data = {
+      groupOp:0,
+      groups:null,
+      rules:rules
+    }
+    return JSON.stringify(data);
+  }
+  function getSearchResult(){
+    var model = getSearchModel();
     var data = {
       pageNum: page+1,
       pageSize: rowsPerPage,
-      isRequestCount: false
+      isRequestCount: false,
+      Filter:model
     }
-    setIsLoading(true)
+    setIsLoading(true);
     axios.post(GetPrescriptionActivityApi,data).then((response)=>{
       let result = response.data.lstPrescriptionActivityRow;
       console.log(result);
@@ -271,7 +283,7 @@ export function PrescriptionBarcodeDetailes(props) {
   }
 
   function searchBtn(e){
-    getData2();
+    getSearchResult();
   }
   const isSelected = id => selected.indexOf(id) !== -1;
 
@@ -328,7 +340,7 @@ export function PrescriptionBarcodeDetailes(props) {
             <Table
               className={classes.table + ' marg-t-10'}
               aria-labelledby="tableTitle"
-              size={dense ? 'small' : 'medium'}
+              size='small'
             >
               <EnhancedTableHead
 
