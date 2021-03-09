@@ -7,7 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import Tooltip  from '@material-ui/core/Tooltip'
+import Tooltip  from '@material-ui/core/Tooltip';
 import '../pulseDesignStyles/pulseDesignStyles.scss';
 import { Form, Row, Col, Button,FormGroup } from 'react-bootstrap';
 import Skeleton from 'react-loading-skeleton';
@@ -27,11 +27,12 @@ import moment from 'moment-jalaali';
 
 function createData(rowNumber, patientNationalCode, patientGivenName, patientSurname, 
                   medicalCouncilNumber,physicianSurname,pharmacyGln,createdDate,status,
-                  statusMessage) {
+                  statusMessage,rowData) {
   var fullName = patientGivenName+' '+patientSurname;
+  var rowItem = JSON.stringify(rowData);
   createdDate=moment(createdDate).format('jYYYY-jMM-jDD HH:mm:ss');
   return { rowNumber, patientNationalCode, fullName, medicalCouncilNumber, physicianSurname,pharmacyGln,createdDate,
-          status,statusMessage };
+          status,statusMessage,rowItem };
 }
 
 function desc(a, b, orderBy) {
@@ -89,7 +90,7 @@ const useStyles = makeStyles(theme => ({
     overflowX: 'auto',
   },
   cell_short: {
-    fontSize: "10px !important"
+    fontSize: "12px !important"
   }
 }));
 const theme = createMuiTheme({
@@ -255,7 +256,6 @@ export function PrescriptionBarcodeDetailes(props) {
     setIsLoading(true);
     axios.post(GetPrescriptionActivityApi,data).then((response)=>{
       let result = response.data.lstPrescriptionActivityRow;
-      console.log(result);
       setCount(response.data.lstCount);
       let temp = [];
       for (let i = 0; i < rowsPerPage * (page - 1); i++) {
@@ -271,18 +271,22 @@ export function PrescriptionBarcodeDetailes(props) {
           item.pharmacyGln,
           item.createdDate,
           item.status,
-          item.statusMessage
+          item.statusMessage,
+          item
           ));
       });
       setRows(temp);
       setIsLoading(false);
-      notifySuccess();
     }).catch((error)=>{
       notifyError();
     })
   }
 
   function searchBtn(e){
+    getSearchResult();
+  }
+
+ function handleConfirmModal(){
     getSearchResult();
   }
   const isSelected = id => selected.indexOf(id) !== -1;
@@ -432,9 +436,9 @@ export function PrescriptionBarcodeDetailes(props) {
                           <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                            <ModalDescription dbid={row.id} title="جزئیات" headerTitle="جزئیات" name={row.title} text={row.description} />
+                            <ModalDescription handleConfirmModal={handleConfirmModal} row={row.rowItem} dbid={row.id} title="جزئیات" headerTitle="لیست اقلام نسخه" name={row.title} text={row.description} />
                             <div style={{marginTop:'10px'}}></div>
-                            <ModalDescription  dbid={row.id} title="ورودیها" headerTitle="ورودیها" name={row.title} text={row.description} />
+                            <ModalDescription row={row.rowItem}  dbid={row.id} title="ورودیها" headerTitle="ورودیها" name={row.title} text={row.description} />
                             </div>
                           </TableCell>
                         </TableRow>
