@@ -66,3 +66,11 @@ body {
     stroke-dashoffset: -124;
   }
 }
+
+.switch-wrapper {
+  position: relative;
+}
+
+.switch-wrapper > div {
+  position: absolute;
+}

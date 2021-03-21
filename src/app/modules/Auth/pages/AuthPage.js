@@ -42,11 +42,10 @@ export function AuthPage() {
                 {/* start:: Aside content */}
                 <div className="flex-column-fluid d-flex flex-column justify-content-center">
                   <h3 className="font-size-h1 mb-5 text-white">
-                    Asanito 
+                    پایش سرویس های واسط سلامت 
                   </h3>
                   <p className="font-weight-lighter text-white opacity-80">
-                    The ultimate Bootstrap & React 16 admin theme framework for next
-                    generation web apps.
+                  پایش سرویس های واسط سلامت 
                   </p>
                 </div>
                 {/* end:: Aside content */}
@@ -88,10 +87,10 @@ export function AuthPage() {
                 <Switch>
                 <ContentRoute path="/auth/login" component={Login}/>
                 {/* <ContentRoute path="/auth/registration" component={Registration}/> */}
-                {/* <ContentRoute
+                <ContentRoute
                     path="/auth/forgot-password"
                     component={ForgotPassword}
-                /> */}
+                />
                 <Redirect from="/auth" exact={true} to="/auth/login"/>
                 <Redirect to="/auth/login"/>
               </Switch>

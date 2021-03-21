@@ -21,7 +21,7 @@ function ForgotPassword(props) {
       .max(50, "Maximum 50 symbols")
       .required(
         intl.formatMessage({
-          id: "AUTH.VALIDATION.REQUIRED_FIELD",
+          id: "مقدار فیلد وارد نشده است.",
         })
       ),
   });
@@ -63,9 +63,9 @@ function ForgotPassword(props) {
       {!isRequested && (
         <div className="login-form login-forgot" style={{ display: "block" }}>
           <div className="text-center mb-10 mb-lg-20">
-            <h3 className="font-size-h1">Forgotten Password ?</h3>
+            <h3 className="font-size-h1">فراموشی رمز عبور</h3>
             <div className="text-muted font-weight-bold">
-              Enter your email to reset your password
+              نام کاربری خود را وارد نمایید.
             </div>
           </div>
           <form
@@ -101,7 +101,7 @@ function ForgotPassword(props) {
                 className="btn btn-primary font-weight-bold px-9 py-4 my-3 mx-4"
                 disabled={formik.isSubmitting}
               >
-                Submit
+                تایید
               </button>
               <Link to="/auth">
                 <button
@@ -109,7 +109,7 @@ function ForgotPassword(props) {
                   id="kt_login_forgot_cancel"
                   className="btn btn-light-primary font-weight-bold px-9 py-4 my-3 mx-4"
                 >
-                  Cancel
+                  انصراف
                 </button>
               </Link>
             </div>

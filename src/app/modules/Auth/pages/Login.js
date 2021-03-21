@@ -9,17 +9,26 @@ import { login } from "../_redux/authCrud";
 import axios from 'axios';
 import {AdminUserLoginApi} from '../../../pages/commonConstants/ApiConstants';
 import * as Token from '../../../pages/_redux/Actions/TokenActions';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
+import WrongPasswordModal from './WrongPasswordModal';
 const initialValues = {
-  email: "admin@demo.com",
-  password: "demo",
+  userName: "",
+  password: "",
 };
 
 export function Login(props) {
   const { intl } = props;
   const [loading, setLoading] = useState(false);
   const tokenDispatch = useDispatch();
+  const [showModal,setShowModal] = useState(false);
   const LoginSchema = Yup.object().shape({
+    userName:Yup.string()
+      .min(3,"حداقل سه کاراکتر")
+      .required(
+        intl.formatMessage({
+          id: "AUTH.VALIDATION.REQUIRED_FIELD",
+        })
+      ),
     password: Yup.string()
       .min(3, "Minimum 3 symbols")
       .max(50, "Maximum 50 symbols")
@@ -58,12 +67,17 @@ export function Login(props) {
       setTimeout(() => {
         var data ={
           "UserName":values.userName,
-          "password":values.password
+          "Password":values.password
         }
         axios.post(AdminUserLoginApi,data).then((response)=>{
           if(response.data.hasError==false){
             disableLoading();
             tokenDispatch(Token.Save_Token(response.data.userDto))
+            setShowModal(false)
+          }else{
+            disableLoading();
+            setShowModal(true);
+            setSubmitting(false);
           }
         }).catch(() => {
           disableLoading();
@@ -82,12 +96,8 @@ export function Login(props) {
     <div className="login-form login-signin" id="kt_login_signin_form">
       {/* begin::Head */}
       <div className="text-center mb-10 mb-lg-20">
-        <h3 className="font-size-h1">
-          Asanito
-        </h3>
-        <p className="text-muted font-weight-bold">
-          نام کاربر و کلمه عبور را وارد نمایید.
-        </p>
+      <h3 _ngcontent-ndw-c159=""  class="font-weight-bolder text-dark text-center font-size-h1 font-size-h1-lg mb-4"> ورود </h3>
+        <span _ngcontent-ndw-c159="" class="font-weight-bold font-size-h6 text-dark-50"> نام کاربری و رمز عبور خود را وارد کنید </span>
       </div>
       {/* end::Head */}
 
@@ -108,26 +118,32 @@ export function Login(props) {
             </div>
           </div>
         )} */}
-
+        {
+          showModal==true?
+            <WrongPasswordModal setShowModal={setShowModal} showModal={showModal}></WrongPasswordModal>
+          :<></>
+        }
         <div className="form-group fv-plugins-icon-container">
+          <label _ngcontent-ndw-c159="" for="username" class="font-size-h6 font-weight-bolder text-dark">نام کاربری</label>
           <input
-            placeholder="userName"
+            placeholder=""
             type="userName"
             className={`form-control form-control-solid h-auto py-5 px-6 ${getInputClasses(
-              "email"
+              "userName"
             )}`}
             name="userName"
             {...formik.getFieldProps("userName")}
           />
-          {formik.touched.email && formik.errors.email ? (
+          {formik.touched.userName && formik.errors.userName ? (
             <div className="fv-plugins-message-container">
-              <div className="fv-help-block">{formik.errors.email}</div>
+                            <div className="fv-help-block">نام کاربری خود را وارد نمایید.</div>
             </div>
           ) : null}
         </div>
         <div className="form-group fv-plugins-icon-container">
+        <label _ngcontent-ndw-c159="" for="password" class="font-size-h6 font-weight-bolder text-dark pt-5"> رمز عبور </label>
           <input
-            placeholder="Password"
+            placeholder=""
             type="password"
             className={`form-control form-control-solid h-auto py-5 px-6 ${getInputClasses(
               "password"
@@ -137,22 +153,24 @@ export function Login(props) {
           />
           {formik.touched.password && formik.errors.password ? (
             <div className="fv-plugins-message-container">
-              <div className="fv-help-block">{formik.errors.password}</div>
+              <div className="fv-help-block">پسورد خود را وارد نمایید.</div>
             </div>
           ) : null}
         </div>
         <div className="form-group d-flex flex-wrap justify-content-between align-items-center">
-          {/* <Link
+          <Link
             to="/auth/forgot-password"
             className="text-dark-50 text-hover-primary my-3 mr-2"
             id="kt_login_forgot"
           >
-            <FormattedMessage id="AUTH.GENERAL.FORGOT_BUTTON" />
-          </Link> */}
+            {/* <FormattedMessage id="AUTH.GENERAL.FORGOT_BUTTON" /> */}
+            فراموشی رمز عبور
+          </Link>
           <button
             id="kt_login_signin_submit"
             type="submit"
             disabled={formik.isSubmitting}
+            style={{backgroundImage: 'linear-gradient(to right, #6a75ca, #9666f7)'}}
             className={`btn btn-primary font-weight-bold px-9 py-4 my-3`}
           >
             <span>ورود</span>
