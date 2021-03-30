@@ -178,7 +178,7 @@ const headRows = [
     const [isEditingOrDeletingOneOrAdding, setIsEditingOrDeletingOneOrAdding] = React.useState(false);
     const [searchModel,setSearchModel] =React.useState({Title:'',Code:''});
     const [srchTitle, setSrchTitle] = React.useState('');
-    const reduxProps = useSelector(state=>state.stockroomReducer);
+    const reduxProps = useSelector(state=>state.users);
     const [isDeletingGroup, setIsDeletingGroup] = React.useState(false);
     const dispatch = useDispatch();
 

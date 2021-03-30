@@ -1,6 +1,6 @@
 // export const serverApi ='http://192.168.56.1:5566/api/';
-export const API_URL ='http://turalprocessingbak.asanito.com/api/';
-// export const API_URL = 'http://localhost:2828/api/';
+// export const API_URL ='http://turalprocessingbak.asanito.com/api/';
+export const API_URL = 'https://localhost:44397/api/';
 
 export const stockRoomGetAllApi = API_URL+'StockRoom/GetAll';
 export const stockRoomEditApi = API_URL+'StockRoom/Edit';
@@ -44,7 +44,7 @@ export const AdminUserChangePasswordApi =API_URL+ 'AdminUser/ChangePassword';
 export const AdminUserGetByIDApi =API_URL+ 'AdminUser/Get/';
 export const AdminUserRemoveApi =API_URL+ 'AdminUser/Remove/';
 export const AdminUserActiveApi =API_URL+ 'AdminUser/Active/';
-export const AdminUserLoginApi = API_URL+'AdminUser/Login';
+export const AdminUserLoginApi = API_URL+'AuthManagement/Login';
 export const AdminUserSearchApi = API_URL+'AdminUser/Search';
 export const AdminUserRemoveByIdsApi = API_URL+'AdminUser/RemoveByIds';
 export const AdminUserEditApi = API_URL+'AdminUser/Edit';

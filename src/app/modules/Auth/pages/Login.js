@@ -21,6 +21,7 @@ export function Login(props) {
   const [loading, setLoading] = useState(false);
   const tokenDispatch = useDispatch();
   const [showModal,setShowModal] = useState(false);
+  const [errorMessage,setErrorMessage]=useState("");
   const LoginSchema = Yup.object().shape({
     userName:Yup.string()
       .min(3,"حداقل سه کاراکتر")
@@ -72,9 +73,10 @@ export function Login(props) {
         axios.post(AdminUserLoginApi,data).then((response)=>{
           if(response.data.hasError==false){
             disableLoading();
-            tokenDispatch(Token.Save_Token(response.data.userDto))
-            setShowModal(false)
+            tokenDispatch(Token.Save_Token(response.data.userDto));
+            setShowModal(false);
           }else{
+            setErrorMessage(response.data.errorMessage);
             disableLoading();
             setShowModal(true);
             setSubmitting(false);
@@ -120,7 +122,7 @@ export function Login(props) {
         )} */}
         {
           showModal==true?
-            <WrongPasswordModal setShowModal={setShowModal} showModal={showModal}></WrongPasswordModal>
+            <WrongPasswordModal errorMessage={errorMessage} setShowModal={setShowModal} showModal={showModal}></WrongPasswordModal>
           :<></>
         }
         <div className="form-group fv-plugins-icon-container">

@@ -37,8 +37,9 @@ export default function BasePage() {
   useEffect(()=>{
     document.getElementsByClassName('container')[0].style.margin = 0;
     document.getElementsByClassName('container')[0].style.width = '100%';
-    document.getElementsByClassName('container')[0].style.paddingLeft = 0;
+    document.getElementsByClassName('container')[0].style.paddingLeft = '28px';
     document.getElementsByClassName('container')[0].style.maxWidth = '1850px';
+    document.getElementsByClassName('container')[0].style.marginTop = '-68px';
   },[]);
   // we need to map the `scale` prop we define below
     // to the transform style property
@@ -78,13 +79,7 @@ export default function BasePage() {
 
     return (
         <Suspense fallback={<LayoutSplashScreen/>}>
-              <AnimatedSwitch
-                  atEnter={bounceTransition.atEnter}
-                  atLeave={bounceTransition.atLeave}
-                  atActive={bounceTransition.atActive}
-                  mapStyles={mapStyles}
-                  className="route-wrapper"
-                >
+              <Switch>
                 {
                     /* Redirect from root URL to /dashboard. */
                     <Redirect exact from="/" to="/products/Categories"/>
@@ -110,7 +105,7 @@ export default function BasePage() {
                 <Route path="/react-bootstrap" component={ReactBootstrapPage}/>
                 <Route path="/e-commerce" component={ECommercePage}/>
                 <Redirect to="error/error-v1"/>
-            </AnimatedSwitch>
+            </Switch>
         </Suspense>
     );
 }

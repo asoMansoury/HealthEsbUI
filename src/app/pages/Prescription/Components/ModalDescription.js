@@ -64,11 +64,11 @@ function ModalDescription(props) {
     const notifyInfo = (title) => toast(title, { duration: toastConfig.duration, style: toastConfig.infoStyle });
 
     const activeList =() =>{
+        notifyInfo("در حال اکتیو کردن اقلام..");
         axios.post(ReActiveByPrescriptionIdApi,{PrescriptionId:item.prescriptionId})
         .then((response)=>{
             notifyInfo(response.data.errorMessage);
             props.handleConfirmModal();
-            setShow(false);
         }).catch((error)=>{
             notifyError();
         });
@@ -131,7 +131,6 @@ function ModalDescription(props) {
               />
               <TableBody>
                 {rows.map((row, index) => {
-                    console.log(row)
                     return (
                       <>
                         <TableRow

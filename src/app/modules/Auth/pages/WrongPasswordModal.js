@@ -30,7 +30,7 @@ function WrongPasswordModal(props) {
                             <Col md='md-4'></Col>
                             <Col md='md-4' style={{margin: '0 auto'}}>
                                 <div className='description-modal'>
-                                    نام کاربری اشتباه وارد شده است.
+                                    {props.errorMessage}
                                 </div>
                             </Col>
                             <Col md='md-4'></Col>
