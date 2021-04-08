@@ -12,6 +12,7 @@ const initialState = {
 export const TokenReducer = persistReducer(
     { storage, key: TOKEN_OBJ, whitelist: ["TokenObject"] },
     (state = initialState, action)=> {
+    console.log("Token...",action)
     switch (action.type) {
         case 'Save_Token': {
             var obj = {

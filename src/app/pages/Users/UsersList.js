@@ -21,7 +21,6 @@ import EnhancedTableHead from '../component/UI/EnhancedTableHead';
 import { tableConfig,toastConfig } from '../Config';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import { connect } from "react-redux";
 import {AdminUsergetUsersApi} from '../commonConstants/apiUrls';
 import { Show_add, Show_edit, Is_not_edited, Is_not_deleted_one, Is_not_deleted_group, Is_not_added } from '../_redux/Actions/usersActions';
 import { useDispatch, useSelector } from "react-redux";
@@ -29,9 +28,8 @@ import UsersModalDeleteGroup from './UsersModalDeleteGroup';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import Toolbar from '@material-ui/core/Toolbar';
-import DropDown from '../component/UI/DropDown';
-
-
+import checkRequests from '../component/ErrroHandling';
+import {CreateUserAction,getUsersAsyncAction, UpdateUserAction} from '../commonConstants/ClaimsConstant'
 
 const headRows = [
   { id: 'id', numeric: true, disablePadding: true, label: 'شناسه' },
@@ -93,6 +91,7 @@ const headRows = [
     const classes = useToolbarStyles();
     const { numSelected } = props;
     const addCategoryShow = props.onAddClick;
+    const actionPermisstion = useSelector(state=>state.tokenReducer.TokenObject.userInfo.claims);
     return (
       <Toolbar
         className={clsx(classes.root, {
@@ -116,7 +115,8 @@ const headRows = [
             <UsersModalDeleteGroup selected={props.selected} />
           )
             :
-            (<Button onClick={addCategoryShow} className='btn-height2 create-btn' variant="info">افزودن کاربر</Button>)}
+            actionPermisstion.find(z=>z.id==CreateUserAction)!==undefined?(<Button onClick={addCategoryShow} className='btn-height2 create-btn' variant="info">افزودن کاربر</Button>):<></>
+          }
         </div>
       </Toolbar>
     );
@@ -172,6 +172,7 @@ const headRows = [
     const [srchTitle, setSrchTitle] = React.useState('');
     const reduxProps = useSelector(state=>state.users);
     const [isDeletingGroup, setIsDeletingGroup] = React.useState(false);
+    const actionPermisstion = useSelector(state=>state.tokenReducer.TokenObject.userInfo.claims);
     const [searchModel,setSearchModel] = React.useState({
       UserName:'',
     })
@@ -216,9 +217,9 @@ const headRows = [
       if (reduxProps.Is_Edited || reduxProps.Is_Deleted_One || reduxProps.Is_Added) {
         setIsEditingOrDeletingOneOrAdding(true);
         getData(rowsPerPage, page + 1, srchTitle, false, true, false);
-        props.notEdited();
-        props.notDeletedOne();
-        props.notAdded();
+        dispatch(Is_not_edited());
+        dispatch(Is_not_deleted_one());
+        dispatch(Is_not_deleted_group());
         if (reduxProps.Is_Deleted_One)
           setSelected([]);
       }
@@ -226,7 +227,7 @@ const headRows = [
         setIsDeletingGroup(true);
         setIsLoading(true);
         getData(rowsPerPage, 1, '', false, false, true);
-        props.notDeletedGroup();
+        dispatch(Is_not_deleted_one())
         setPage(0);
         setSelected([]);
       }
@@ -342,14 +343,17 @@ const headRows = [
       getData(tableConfig.rowsPerPageDefault, 1, '', false, false, false);
       setPage(0);
     }
-
+    
     return (
       <>
+    {
+      actionPermisstion.find(z=>z.id==getUsersAsyncAction)!==undefined?
         <div className="row">
         <div className="col-md-12">
           <CardComponent>
               <FormGroup>
-                <Row>
+
+                  <Row>
                     <Col md='4'>
                       <Form.Label className='custom-label marg-t-20 bold'>نام کاربری</Form.Label>
                       <Form.Control onChange={(e)=>setSearchModel({...searchModel,UserName:e.target.value})}  className='form-control-custom' as="input" />
@@ -363,12 +367,19 @@ const headRows = [
           </CardComponent>
         </div>
       </div>
+      :<></>
+    }
+
       <div className={classes.root}>
       <CardComponent>
         <ThemeProvider theme={theme}>
         <Paper className={classes.paper}>
           <EnhancedTableToolbar numSelected={selected.length} selected={selected}   onAddClick={showAddSlider}/>
+          {
+              actionPermisstion.find(z=>z.id==getUsersAsyncAction)!==undefined?
+
           <div className={classes.tableWrapper}>
+
             <Table
               className={classes.table + ' marg-t-10'}
               aria-labelledby="tableTitle"
@@ -421,7 +432,11 @@ const headRows = [
                           <TableCell align="center">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              <div className="delete-img-con btn-for-select" dbid={row.id}  userRow={JSON.stringify(row)} onClick={editShowSlider} ><img className='edit-img btn-for-select' src={editImage} /></div>
+                              {
+                                actionPermisstion.find(z=>z.id==UpdateUserAction)!==undefined?
+                                <div className="delete-img-con btn-for-select" dbid={row.id}  userRow={JSON.stringify(row)} onClick={editShowSlider} ><img className='edit-img btn-for-select' src={editImage} /></div>
+                                :<></>
+                              }
                               <CategoryModalDelete dbid={row.id} name={row.title} />
                             </div>
                           </TableCell>
@@ -437,6 +452,11 @@ const headRows = [
               </TableBody>
             </Table>
           </div>
+          :<></>
+        }
+          {
+            actionPermisstion.find(z=>z.id==getUsersAsyncAction)!==undefined?
+
           <TablePagination className='MuiTablePagination-root MuiTypography-root'
             rowsPerPageOptions={tableConfig.rowsPerPageOpt}
             component="div"
@@ -450,8 +470,10 @@ const headRows = [
               'aria-label': 'Next Page',
             }}
             onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          />
+            onChangeRowsPerPage={handleChangeRowsPerPage}/>
+            
+            :<></>
+          }
         </Paper>
       </ThemeProvider>
       </CardComponent>
@@ -465,22 +487,4 @@ const headRows = [
 
 
 
-const mapStateToProps = (state => {
-    return {
-      Is_Edited: state.users.Is_Edited,
-      Is_Deleted_One: state.users.Is_Deleted_One,
-      Is_Deleted_Group: state.users.Is_Deleted_Group,
-      Is_Added: state.users.Is_Added,
-    };
-});
-  
-const mapDispatchToProps = (dispatch) => ({
-  showAddFunction: () => dispatch(Show_add()),
-  showEditFunction: (obj) => dispatch(Show_edit(obj)),
-  notEdited: () => dispatch(Is_not_edited()),
-  notDeletedOne: () => dispatch(Is_not_deleted_one()),
-  notDeletedGroup: () => dispatch(Is_not_deleted_group()),
-  notAdded: () => dispatch(Is_not_added()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(UsersList);
+export default checkRequests(UsersList,axios);

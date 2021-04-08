@@ -5,14 +5,16 @@ import { useState } from 'react';
 import { Preloader, Oval } from 'react-preloader-icon';
 import deleteImage from '../pulseDesignImages/delete.svg';
 import { Is_deleted_one } from '../_redux/Actions/usersActions';
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { API_URL, toastConfig } from '../Config';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {AdminUserRemoveByIdsApi} from '../commonConstants/ApiConstants';
+import checkRequests from '../component/ErrroHandling';
 
 function UsersModalDelete(props) {
     const [show, setShow] = useState(false);
+    const dispatch = useDispatch();
     const handleClose = () => {
         setShow(false);
     }
@@ -27,7 +29,7 @@ function UsersModalDelete(props) {
             .then(res => {
                 if(res.data.hasError==false){
                     notifySuccess();
-                    props.deletedOne();
+                    dispatch(Is_deleted_one());
                 }else{
                     notifyError();
                 }
@@ -69,13 +71,5 @@ function UsersModalDelete(props) {
     );
 }
 
-const mapStateToProps = (state => {
-    return {
 
-    };
-});
-const mapDispatchToProps = (dispatch) => ({
-    deletedOne: () => dispatch(Is_deleted_one())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(UsersModalDelete);
+export default checkRequests(UsersModalDelete,axios);

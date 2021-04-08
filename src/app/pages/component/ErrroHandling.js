@@ -8,6 +8,7 @@ const checkRequests= (Wrapped,axios) => {
     function CheckRequests(props) {
         const token = JSON.parse(localStorage.getItem("persist:tokenObject"));
         const tokenObj = JSON.parse(token.TokenObject).Token;
+        console.log("tt",tokenObj);
         const notifyError = (title) => toast(title , { duration: toastConfig.duration, style: toastConfig.errorStyle });
         const tokenDispatch = useDispatch();
         axios.interceptors.request.use(request=>{

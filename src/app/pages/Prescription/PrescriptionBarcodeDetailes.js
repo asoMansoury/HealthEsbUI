@@ -7,7 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import Tooltip  from '@material-ui/core/Tooltip';
+import { useDispatch, useSelector } from "react-redux";
 import '../pulseDesignStyles/pulseDesignStyles.scss';
 import { Form, Row, Col, Button,FormGroup } from 'react-bootstrap';
 import Skeleton from 'react-loading-skeleton';
@@ -25,6 +25,7 @@ import EnhancedTableHead from '../component/UI/EnhancedTableHead';
 import {DatePickerComponent} from '../component/DatePickerComponent/DatePickerComponent';
 import checkRequests from '../component/ErrroHandling';
 import moment from 'moment-jalaali';
+import {GetPrescriptionActivityAction,ReActiveUidAction} from '../commonConstants/ClaimsConstant'
 
 function createData(rowNumber,outPrescriptionId, patientNationalCode, patientGivenName, patientSurname, 
                   medicalCouncilNumber,physicianSurname,pharmacyGln,createdDate,status,
@@ -117,6 +118,7 @@ export function PrescriptionBarcodeDetailes(props) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [rows, setRows] = React.useState([]);
   const [count, setCount] = React.useState(0);
+  const actionPermisstion = useSelector(state=>state.tokenReducer.TokenObject.userInfo.claims);
   const [searchModel,setSearchModel] = React.useState({
     PatientNationalCode:'',
     PharmacyGln:'',
@@ -301,6 +303,8 @@ export function PrescriptionBarcodeDetailes(props) {
 
   return (
     <>
+    {
+      actionPermisstion.find(z=>z.id==GetPrescriptionActivityAction)!==undefined?
       <div className="row">
         <div className="col-md-12">
           <CardComponent>
@@ -342,12 +346,15 @@ export function PrescriptionBarcodeDetailes(props) {
           </CardComponent>
         </div>
       </div>
-
+    :<></>
+    }
     <div className={classes.root}>
       <CardComponent>
       <ThemeProvider theme={theme}>
         <Paper className={classes.paper}>
-        <div className={classes.tableWrapper}>
+        {
+          actionPermisstion.find(z=>z.id==GetPrescriptionActivityAction)!==undefined?
+          <div className={classes.tableWrapper}>
             <Table
               className={classes.table + ' marg-t-10'}
               aria-labelledby="tableTitle"
@@ -449,7 +456,11 @@ export function PrescriptionBarcodeDetailes(props) {
                           <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                            <ModalDescription handleConfirmModal={handleConfirmModal} handleCloseModal={handleCloseModal} row={row.rowItem} dbid={row.id} title="جزئیات" headerTitle="لیست اقلام نسخه" name={row.title} text={row.description} />
+                              {
+                                  actionPermisstion.find(z=>z.id==ReActiveUidAction)!==undefined?
+                                    <ModalDescription handleConfirmModal={handleConfirmModal} handleCloseModal={handleCloseModal} row={row.rowItem} dbid={row.id} title="جزئیات" headerTitle="لیست اقلام نسخه" name={row.title} text={row.description} />
+                                  :<></>
+                              }
                             <div style={{marginTop:'10px'}}></div>
                             <ModalDescription handleConfirmModal={handleConfirmModal} handleCloseModal={handleCloseModal} row={row.rowItem} dbid={row.id} title="ورودیها" headerTitle="لیست اقلام نسخه" name={row.title} text={row.description} />
                             </div>
@@ -466,6 +477,10 @@ export function PrescriptionBarcodeDetailes(props) {
               </TableBody>
             </Table>
           </div>
+          :<></>
+        }
+        {
+          actionPermisstion.find(z=>z.id==GetPrescriptionActivityAction)!==undefined?
           <TablePagination className='MuiTablePagination-root MuiTypography-root'
             rowsPerPageOptions={tableConfig.rowsPerPageOpt}
             component="div"
@@ -479,8 +494,9 @@ export function PrescriptionBarcodeDetailes(props) {
               'aria-label': 'Next Page',
             }}
             onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
-          />
+            onChangeRowsPerPage={handleChangeRowsPerPage}/>
+          :<></>
+        }
         </Paper>
       </ThemeProvider>
       <Toaster position={toastConfig.position} />
@@ -491,4 +507,4 @@ export function PrescriptionBarcodeDetailes(props) {
   );
 }
 
-export default  PrescriptionBarcodeDetailes
+export default  checkRequests(PrescriptionBarcodeDetailes,axios)

@@ -4,6 +4,7 @@ import UsersAdd from './UsersAdd';
 import UsersEdit from './UsersEdit';
 import axios from 'axios';
 import {AdminUserGetRolesApi} from '../commonConstants/apiUrls';
+import checkRequests from '../component/ErrroHandling';
 
 export class UsersPage extends React.Component {
     constructor(){
@@ -31,6 +32,8 @@ export class UsersPage extends React.Component {
                     rolesSource:roleTempArray
                 });
             }
+        }).catch((error)=>{
+            
         })
     }
 
@@ -50,4 +53,4 @@ export class UsersPage extends React.Component {
     }
 }
 
-export default UsersPage;
+export default checkRequests(UsersPage,axios);

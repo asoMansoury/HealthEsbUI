@@ -11,6 +11,7 @@ import DropDown from '../component/UI/DropDown';
 import { NumberToWords } from "persian-tools2";
 import { useDispatch, useSelector } from "react-redux";
 import Select from 'react-select';
+import checkRequests from '../component/ErrroHandling';
 export function RolesAdd(props){
     const dispatch = useDispatch();
     const reduxProps = useSelector(state=>state.users);
@@ -121,4 +122,4 @@ export function RolesAdd(props){
     );
 }
 
-export default RolesAdd;
+export default checkRequests(RolesAdd,axios);

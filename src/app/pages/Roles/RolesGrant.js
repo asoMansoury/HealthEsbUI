@@ -11,6 +11,7 @@ import { Form, Row, Col, Button } from 'react-bootstrap';
 import { useControlled } from '@material-ui/core';
 import Select from 'react-select';
 import checkRequests from '../component/ErrroHandling';
+import utility from '../commonConstants/commonUtility'
 import formatGroupLabel from '../component/ReactMultiSelect/formatGroupLabel';
 const useStyles = makeStyles(theme => ({
   divider: {
@@ -80,11 +81,10 @@ export const RolesGrant = (props) => {
     var dbid = props.location.state.data;
     setRoleID(dbid);
     axios.post(AdminUserGetClaimListApi,{PageNum:1,PageSize:1000}).then((response)=>{
-
-      var groupd = groupBy(response.data.claims,'controllerName');
+      var groupd =utility.groupBy(response.data.claims,'controllerName');
       var tmpOptions=[];
       response.data.claims.map((item,index)=>{
-          if(!tmpOptions.find(z=>z.label==item.controllerName)){
+          if(!tmpOptions.find(z=>z.label==item.controlleFaTitile)){
             var items = groupd[item.controllerName];
             var tmpActions=[];
             items.map((actionItem,index)=>{
@@ -199,5 +199,5 @@ export const RolesGrant = (props) => {
 
 
 
-// export default checkRequests(RolesGrant,axios)
-export default RolesGrant;
+export default checkRequests(RolesGrant,axios)
+// export default RolesGrant;

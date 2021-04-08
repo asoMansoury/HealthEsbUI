@@ -12,6 +12,7 @@ import DropDown from '../component/UI/DropDown';
 import { NumberToWords } from "persian-tools2";
 import { useDispatch, useSelector } from "react-redux";
 import Select from 'react-select';
+import checkRequests from '../component/ErrroHandling';
 
 export function UsersEdit(props) {
     const dispatch = useDispatch();
@@ -208,15 +209,6 @@ export function UsersEdit(props) {
         );
 }
 
-const mapStateToProps = (state => {
-    return {
-        Show_Hide_Edit: state.users.Show_Hide_Edit,
-        Is_Edited: state.users.Is_Edited
-    };
-});
-const mapDispatchToProps = (dispatch) => ({
-    hideFunction: () => dispatch(Hide_edit()),
-    edited: () => dispatch(Is_edited())
-});
 
-export default connect(mapStateToProps, mapDispatchToProps)(UsersEdit);
+
+export default checkRequests(UsersEdit,axios);

@@ -10,7 +10,7 @@ import { API_URL, toastConfig } from '../Config';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {AdminUserRemoveByIdsApi} from '../commonConstants/ApiConstants';
-
+import checkRequests from '../component/ErrroHandling';
 function UsersModalDeleteGroup(props) {
     const [show, setShow] = useState(false);
     const handleClose = () => {
@@ -74,13 +74,5 @@ function UsersModalDeleteGroup(props) {
     );
 }
 
-const mapStateToProps = (state => {
-    return {
 
-    };
-});
-const mapDispatchToProps = (dispatch) => ({
-    deletedGroup: () => dispatch(Is_deleted_group())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(UsersModalDeleteGroup);
+export default checkRequests(UsersModalDeleteGroup,axios);

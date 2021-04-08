@@ -12,7 +12,11 @@ import toast, { Toaster } from 'react-hot-toast';
 import {TableRow,TableCell,Table,TableBody} from '@material-ui/core';
 import Skeleton from 'react-loading-skeleton';
 import EnhancedTableHead from '../../component/UI/EnhancedTableHead';
-import {CardComponent} from '../../component/UI/CardComponent'
+import {CardComponent} from '../../component/UI/CardComponent';
+import checkRequests from '../../component/ErrroHandling';
+import {GetPrescriptionActivityAction,ReActiveUidAction} from '../../commonConstants/ClaimsConstant'
+import { useDispatch, useSelector } from "react-redux";
+
 const headRows = [
     { id: 'id', numeric: true, disablePadding: true, label: '#' },
     { id: 'title', numeric: false, disablePadding: true, label: 'کد جنریک' },
@@ -57,6 +61,7 @@ function ModalDescription(props) {
     const [btnDisabled,setBtnDisabled]=useState('');
     const [item,setItem]=useState();
     const [rows,setRows] = useState([]);
+    const actionPermisstion = useSelector(state=>state.tokenReducer.TokenObject.userInfo.claims);
     const handleClose = () => {
         setShow(false);
         props.handleCloseModal();
@@ -214,14 +219,19 @@ function ModalDescription(props) {
                 </Modal.Body>
                     <Row >
                         <Col md='4'></Col>
-                        <Col md='4'>
-                            <Button variant="primary" onClick={activeList}
-                                    disabled={btnDisabled}
-                            >
-                              {btnDisabled!=='' ? "در حال انجام اکتیو..." : "اکتیو کن همه اقلام بالا را"}
-                                
-                            </Button>
-                        </Col>
+                        {
+                                actionPermisstion.find(z=>z.id==ReActiveUidAction)!==undefined?
+                                <Col md='4'>
+                                  <Button variant="primary" onClick={activeList}
+                                          disabled={btnDisabled}
+                                  >
+                                    {btnDisabled!=='' ? "در حال انجام اکتیو..." : "اکتیو کن همه اقلام بالا را"}
+                                      
+                                  </Button>
+                              </Col>
+                                :<></>
+                        }
+
                     </Row>
                 <Modal.Footer>
                     <Button variant="primary" onClick={handleClose}>
@@ -233,4 +243,4 @@ function ModalDescription(props) {
         </>
     );
 }
-export default ModalDescription;
+export default checkRequests(ModalDescription,axios);

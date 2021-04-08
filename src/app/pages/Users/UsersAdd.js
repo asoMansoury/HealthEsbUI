@@ -13,6 +13,8 @@ import DropDown from '../component/UI/DropDown';
 import { NumberToWords } from "persian-tools2";
 import { useDispatch, useSelector } from "react-redux";
 import Select from 'react-select';
+import checkRequests from '../component/ErrroHandling';
+
 export function UsersAdd(props){
     const dispatch = useDispatch();
     const reduxProps = useSelector(state=>state.users);
@@ -190,15 +192,4 @@ export function UsersAdd(props){
     );
 }
 
-const mapStateToProps = (state => {
-    return {
-        Show_Hide_Add: state.users.Show_Hide_Add,
-        Is_Added: state.users.Is_Added
-    };
-});
-const mapDispatchToProps = (dispatch) => ({
-    hideFunction: () => dispatch(Hide_add()),
-    added: () => dispatch(Is_added())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(UsersAdd);
+export default checkRequests(UsersAdd,axios);

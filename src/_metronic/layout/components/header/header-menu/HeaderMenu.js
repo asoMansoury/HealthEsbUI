@@ -4,12 +4,15 @@ import { useLocation } from "react-router";
 import { NavLink } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { toAbsoluteUrl, checkIsActive } from "../../../../_helpers";
+import { shallowEqual, useSelector,useDispatch } from "react-redux";
 import {processListPath
         ,rolesPath
         ,usersPath
         ,PrescriptionBarcodeDetailesPath
     } from '../../../../../app/pages/commonConstants/RouteConstant';
+import {AuthManagmentController,PrescriptionBarcodeController,PrescriptionController} from '../../../../../app/pages/commonConstants/ClaimsConstant';
 export function HeaderMenu({ layoutProps }) {
+    const tokenObject = useSelector(state=>state.tokenReducer.TokenObject.userInfo.claims);
     const location = useLocation();
     const getMenuItemActive = (url) => {
         return checkIsActive(location, url) ? "menu-item-active" : "";
@@ -24,7 +27,9 @@ export function HeaderMenu({ layoutProps }) {
 
                         {/*end::1 Level*/}
                         {/*begin::1 Level*/}
-                        <li
+               {
+                   tokenObject.find(z=>z.controllerEntityID==AuthManagmentController)!==undefined?
+               <li
                 data-menu-toggle={layoutProps.menuDesktopToggle}
                 aria-haspopup="true"
                 className={`menu-item menu-item-submenu menu-item-rel ${getMenuItemActive('/')}`}>
@@ -71,8 +76,12 @@ export function HeaderMenu({ layoutProps }) {
 
                 </div>
             </li>
+                 :<></>
+                }
             {/*end::1 Level*/}
             {/*begin::1 Level*/}
+            {
+                tokenObject.find(z=>z.controllerEntityID==PrescriptionBarcodeController)!==undefined?
             <li
                 data-menu-toggle={layoutProps.menuDesktopToggle}
                 aria-haspopup="true"
@@ -105,7 +114,8 @@ export function HeaderMenu({ layoutProps }) {
                     </div>
                 </div>
             </li>
-
+            :<></>
+            }
         </ul>
         {/*end::Header Nav*/}
     </div>;

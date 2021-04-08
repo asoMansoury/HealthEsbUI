@@ -26,9 +26,10 @@ import UsersModalDeleteGroup from './UsersModalDeleteGroup';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import Toolbar from '@material-ui/core/Toolbar';
-import DropDown from '../component/UI/DropDown';
+import checkRequests from '../component/ErrroHandling';
 import {rolesGrantPath} from '../commonConstants/RouteConstant'
 import { useHistory } from 'react-router-dom';
+import {CreateRolesAction,GetRolesAction,UpdateRolesAction} from '../commonConstants/ClaimsConstant'
 
 const headRows = [
   { id: 'id', numeric: true, disablePadding: true, label: 'شناسه' },
@@ -89,6 +90,7 @@ const headRows = [
     const classes = useToolbarStyles();
     const { numSelected } = props;
     const addCategoryShow = props.onAddClick;
+    const actionPermisstion = useSelector(state=>state.tokenReducer.TokenObject.userInfo.claims);
     return (
       <Toolbar
         className={clsx(classes.root, {
@@ -112,7 +114,8 @@ const headRows = [
             <UsersModalDeleteGroup selected={props.selected} />
           )
             :
-            (<Button onClick={addCategoryShow} className='btn-height2 create-btn' variant="info">افزودن نقش</Button>)}
+            actionPermisstion.find(z=>z.id==CreateRolesAction)!==undefined?(<Button onClick={addCategoryShow} className='btn-height2 create-btn' variant="info">افزودن نقش</Button>):<></>
+            }
         </div>
       </Toolbar>
     );
@@ -169,6 +172,7 @@ const headRows = [
     const reduxProps = useSelector(state=>state.users);
     const [isDeletingGroup, setIsDeletingGroup] = React.useState(false);
     const history = useHistory();
+    const actionPermisstion = useSelector(state=>state.tokenReducer.TokenObject.userInfo.claims);
     const [searchModel,setSearchModel] = React.useState({
       Name:'',
     })
@@ -331,8 +335,12 @@ const headRows = [
 
     return (
       <>
+      {
+        actionPermisstion.find(z=>z.id==GetRolesAction)!==undefined?
+
+
         <div className="row">
-        <div className="col-md-12">
+          <div className="col-md-12">
           <CardComponent>
               <FormGroup>
                 <Row>
@@ -348,8 +356,9 @@ const headRows = [
               </FormGroup>
           </CardComponent>
         </div>
-      </div>
-      
+        </div>
+      :<></>
+    }
       <div className={classes.root}>
       <CardComponent>
         <ThemeProvider theme={theme}>
@@ -402,8 +411,13 @@ const headRows = [
                           <TableCell align="center">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
+                              
                             <div className="delete-img-con btn-for-select"  dbid={row.id} userRow={row} onClick={grantRole} ><BuildIcon style={{color: '#6610f2'}}></BuildIcon> </div>
-                              <div className="delete-img-con btn-for-select" dbid={row.id}  userRow={JSON.stringify(row)} onClick={editShowSlider} ><img className='edit-img btn-for-select' src={editImage} /></div>
+                            {        
+                                actionPermisstion.find(z=>z.id==UpdateRolesAction)!==undefined?
+                                <div className="delete-img-con btn-for-select" dbid={row.id}  userRow={JSON.stringify(row)} onClick={editShowSlider} ><img className='edit-img btn-for-select' src={editImage} /></div>
+                              :<></>
+                            }
                               <RolesModalDelete dbid={row.id} name={row.name} />
                             </div>
                           </TableCell>
@@ -447,22 +461,5 @@ const headRows = [
 
 
 
-const mapStateToProps = (state => {
-    return {
-      Is_Edited: state.users.Is_Edited,
-      Is_Deleted_One: state.users.Is_Deleted_One,
-      Is_Deleted_Group: state.users.Is_Deleted_Group,
-      Is_Added: state.users.Is_Added,
-    };
-});
-  
-const mapDispatchToProps = (dispatch) => ({
-  showAddFunction: () => dispatch(Show_add()),
-  showEditFunction: (obj) => dispatch(Show_edit(obj)),
-  notEdited: () => dispatch(Is_not_edited()),
-  notDeletedOne: () => dispatch(Is_not_deleted_one()),
-  notDeletedGroup: () => dispatch(Is_not_deleted_group()),
-  notAdded: () => dispatch(Is_not_added()),
-});
 
-export default connect(mapStateToProps, mapDispatchToProps)(RolesList);
+export default checkRequests(RolesList,axios);

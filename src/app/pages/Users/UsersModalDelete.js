@@ -10,6 +10,7 @@ import { API_URL, toastConfig } from '../Config';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {AdminUserRemoveByIdsApi} from '../commonConstants/ApiConstants';
+import checkRequests from '../component/ErrroHandling';
 
 function UsersModalDelete(props) {
     const [show, setShow] = useState(false);
@@ -69,13 +70,5 @@ function UsersModalDelete(props) {
     );
 }
 
-const mapStateToProps = (state => {
-    return {
 
-    };
-});
-const mapDispatchToProps = (dispatch) => ({
-    deletedOne: () => dispatch(Is_deleted_one())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(UsersModalDelete);
+export default checkRequests(UsersModalDelete,axios);
