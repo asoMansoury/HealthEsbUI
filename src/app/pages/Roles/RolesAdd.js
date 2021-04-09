@@ -1,28 +1,24 @@
 import React, { useEffect,useState } from 'react';
-import { Show_add } from '../_redux/Actions/usersActions';
+import { Show_add,Is_added } from '../_redux/Actions/usersActions';
 import { Hide_add } from '../_redux/Actions/usersActions';
-import { connect } from "react-redux";
 import { SideBarConfig, toastConfig } from '../Config';
 import { Form, Row, Col, Button } from 'react-bootstrap';
 import toast from 'react-hot-toast';
-import {AdminUserCreateUserApi} from '../commonConstants/apiUrls';
+import {AdminUserCreateRolesApi} from '../commonConstants/apiUrls';
 import axios from 'axios';
-import { Is_added } from '../_redux/Actions/usersActions';
 import validator from 'validator'
 import DropDown from '../component/UI/DropDown';
 import { NumberToWords } from "persian-tools2";
 import { useDispatch, useSelector } from "react-redux";
 import Select from 'react-select';
-export function UsersAdd(props){
+export function RolesAdd(props){
     const dispatch = useDispatch();
     const reduxProps = useSelector(state=>state.users);
     const [leftSideBar,setLeftSideBar] = React.useState(-SideBarConfig.width);
     const [selectedRole,setSelectedRole]=useState([]);
     const [selectedRoleID,setSelectedRoleID]=useState([]);
     const [model,setModel] = useState({
-        userName:'',
-        email:'',
-        password:''
+        name:''
     });
     function closeClick() {
         dispatch(Hide_add());
@@ -61,41 +57,6 @@ export function UsersAdd(props){
             setLeftSideBar(left);
         }, frame);
     }
-    function onChangeUserRole(e){
-        setSelectedRole(e);
-        if(e!=null){
-            var tmpArray=[];
-            e.map((item,index)=>{
-                tmpArray.push(item.value);
-            });
-            setSelectedRoleID(tmpArray);
-        }else{
-            setSelectedRoleID([]);
-        }
-      }
-
-    function emailOnBlur(){
-        var email = model.email;
-        if(email!==''){
-            if(!validator.isEmail(email))
-            {
-                notifyError("فرمت ایمیل صحیح نمی باشد.")
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    function passwordOnBlur(){
-        var password = model.password;
-        if(password===''){
-            notifyError("کلمه عبور الزامی می باشد.");
-            return false;
-        }
-
-        return true;
-    }
 
     useEffect(()=>{
         if (reduxProps.Show_Hide_Add == 'Show_add') {
@@ -105,26 +66,22 @@ export function UsersAdd(props){
             hideSideBar();
     },[reduxProps])
 
-    const notifySuccess = (title) => toast('کاربر ' + title + ' با موفقیت افزوده شد.', { duration: toastConfig.duration, style: toastConfig.successStyle });
+    const notifySuccess = (title) => toast('نقش ' + title + ' با موفقیت افزوده شد.', { duration: toastConfig.duration, style: toastConfig.successStyle });
     const notifyError = (title) => toast(title , { duration: toastConfig.duration, style: toastConfig.errorStyle });
-    const notifyInfo = (title) => toast('در حال افزودن کاربر  ' + title + ' ...', { duration: toastConfig.duration, style: toastConfig.infoStyle });
+    const notifyInfo = (title) => toast('در حال افزودن نقش  ' + title + ' ...', { duration: toastConfig.duration, style: toastConfig.infoStyle });
     const notifyNotValidateTitle = (errorTitle) => toast(errorTitle, { duration: toastConfig.duration, style: toastConfig.errorStyle });
 
    function save() {
         if(!validate())
             return;
         var data = {
-            UserName:model.userName,
-            Email:model.email,
-            Password:model.password,
-            LstRoleId:selectedRoleID,
+            name:model.name,
         }
-        axios.post(AdminUserCreateUserApi, data)
+        axios.post(AdminUserCreateRolesApi, data)
             .then(res => {
                 if(res.data.hasError==false){
                     notifySuccess(model.userName);
                     dispatch(Is_added());
-
                 }else{
                   notifyError(res.data.errorMessage);
                 }
@@ -133,24 +90,14 @@ export function UsersAdd(props){
                 notifyError(error);
             });
         dispatch(Hide_add());
-        notifyInfo(model.userName);
+        notifyInfo(model.name);
     }
     
     function validate(){
         let hasError = false;
-        if(passwordOnBlur()===false){
-            hasError =true;
-        }
-        if(model.userName===''){
-            notifyError("نام کاربر الزامی می باشد.")
+        if(model.name===''){
+            notifyError("نام نقش الزامی می باشد.")
             return false;
-        }
-        if(model.email===''){
-            notifyError("ایمیل الزامی می باشد.");
-            return false;
-        }
-        if(emailOnBlur()===false){
-            hasError=true;
         }
         return !hasError;
     }
@@ -160,27 +107,11 @@ export function UsersAdd(props){
                 <div className='category-add-close-btn-container'>
                     <button className='category-add-close-btn' onClick={closeClick}>x</button>
                 </div>
-                <div className='category-add-header-text'>افزودن کاربر</div>
+                <div className='category-add-header-text'>افزودن نقش</div>
             </div>
             <div className='category-add-body'>                
-                <Form.Label className='custom-label bold'>نام کاربری</Form.Label>
-                <Form.Control  className='form-control-custom' type="Name" aria-required={true} onChange={(e)=>setModel({...model,userName:e.target.value})} />
-
-                <Form.Label className='custom-label bold'>ایمیل</Form.Label>
-                <Form.Control  className='form-control-custom' type="Name" onBlur={emailOnBlur} aria-required={true} onChange={(e)=>setModel({...model,email:e.target.value})}/>
-                
-                <Form.Label className='custom-label bold' onChange={(e)=>setModel({...model,userName:e.target.value})}>نقش کاربر</Form.Label>
-                <Select
-                        value={selectedRole}
-                        onChange={onChangeUserRole}
-                        isRtl={true}
-                        isSearchable={true}
-                        closeMenuOnSelect={false}
-                        isMulti
-                        options={props.rolesSource}/>
-                <Form.Label className='custom-label bold'>کلمه عبور</Form.Label>
-                <Form.Control className='form-control-custom' onChange={(e)=>setModel({...model,password:e.target.value})} type="Password" aria-required={true} />
-
+                <Form.Label className='custom-label bold'>نام نقش</Form.Label>
+                <Form.Control  className='form-control-custom' type="Name" aria-required={true} onChange={(e)=>setModel({...model,name:e.target.value})} />
             </div>
             <div className='category-add-footer'>
                 <div className='btn-custom btn-custom-save' onClick={save}>ذخیره</div>
@@ -190,15 +121,4 @@ export function UsersAdd(props){
     );
 }
 
-const mapStateToProps = (state => {
-    return {
-        Show_Hide_Add: state.users.Show_Hide_Add,
-        Is_Added: state.users.Is_Added
-    };
-});
-const mapDispatchToProps = (dispatch) => ({
-    hideFunction: () => dispatch(Hide_add()),
-    added: () => dispatch(Is_added())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(UsersAdd);
+export default RolesAdd;

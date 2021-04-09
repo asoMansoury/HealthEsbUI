@@ -3,24 +3,28 @@ import React from "react";
 import SVG from "react-inlinesvg";
 import { useHistory } from "react-router-dom";
 import {toAbsoluteUrl} from "../../../../_helpers";
+import {removeStorage} from '../../../../_helpers/LocalStorageHelpers';
+import {TOKEN_OBJ} from '../../../../../app/pages/commonConstants/commonConstants';
+import * as Token from '../../../../../app/pages/_redux/Actions/TokenActions';
+import { useDispatch, useSelector } from 'react-redux';
 
-export function QuickUser() {
+export function QuickUser(props) {
   const history = useHistory();
-
+  const tokenDispatch = useDispatch();
   const logoutClick = () => {
       const toggle = document.getElementById("kt_quick_user_toggle");
       if (toggle) {
         toggle.click();
       }
-      history.push("/logout");
+      tokenDispatch(Token.Save_Token({token:''}))
   };
 
   return (
       <div id="kt_quick_user" className="offcanvas offcanvas-right offcanvas p-10">
         <div className="offcanvas-header d-flex align-items-center justify-content-between pb-5">
           <h3 className="font-weight-bold m-0">
-            User Profile
-            <small className="text-muted font-size-sm ml-2">12 messages</small>
+          {props.tokenObject.userInfo!=undefined?props.tokenObject.userInfo.fullName:"Test"}
+            <small className="text-muted font-size-sm ml-2"> </small>
           </h3>
           <a
               href="#"
@@ -50,9 +54,9 @@ export function QuickUser() {
                   href="#"
                   className="font-weight-bold font-size-h5 text-dark-75 text-hover-primary"
               >
-                James Jones
+                {props.tokenObject.userInfo!=undefined?props.tokenObject.userInfo.userName:"Test"}
               </a>
-              <div className="text-muted mt-1">Application Developer</div>
+              {/* <div className="text-muted mt-1">Application Developer</div> */}
               <div className="navi mt-2">
                 <a href="#" className="navi-item">
                 <span className="navi-link p-0 pb-2">
@@ -66,7 +70,7 @@ export function QuickUser() {
                     </span>
                   </span>
                   <span className="navi-text text-muted text-hover-primary">
-                    jm@softplus.com
+                    test@gmail.com
                   </span>
                 </span>
                 </a>
@@ -74,14 +78,14 @@ export function QuickUser() {
               {/* <Link to="/logout" className="btn btn-light-primary btn-bold">
                 Sign Out
               </Link> */}
-              <button className="btn btn-light-primary btn-bold" onClick={logoutClick}>Sign out</button>
+              <button className="btn btn-light-primary btn-bold" onClick={logoutClick}>خروج</button>
             </div>
           </div>
 
           <div className="separator separator-dashed mt-8 mb-5"/>
 
           <div className="navi navi-spacer-x-0 p-0">
-            <a href="/user/profile" className="navi-item">
+            {/* <a href="/user/profile" className="navi-item">
               <div className="navi-link">
                 <div className="symbol symbol-40 bg-light mr-3">
                   <div className="symbol-label">
@@ -105,9 +109,9 @@ export function QuickUser() {
                   </div>
                 </div>
               </div>
-            </a>
+            </a> */}
 
-            <a href="/user/profile" className="navi-item">
+            {/* <a href="/user/profile" className="navi-item">
               <div className="navi-link">
                 <div className="symbol symbol-40 bg-light mr-3">
                   <div className="symbol-label">
@@ -125,8 +129,8 @@ export function QuickUser() {
                   <div className="text-muted">Inbox and tasks</div>
                 </div>
               </div>
-            </a>
-
+            </a> */}
+{/* 
             <a href="/user/profile" className="navi-item">
               <div className="navi-link">
                 <div className="symbol symbol-40 bg-light mr-3">
@@ -166,12 +170,13 @@ export function QuickUser() {
                 </div>
               </div>
             </a>
+           */}
           </div>
 
           <div className="separator separator-dashed my-7"></div>
 
           <div>
-            <h5 className="mb-5">Recent Notifications</h5>
+            {/* <h5 className="mb-5">Recent Notifications</h5>
 
             <div className="d-flex align-items-center bg-light-warning rounded p-5 gutter-b">
             <span className="svg-icon svg-icon-warning mr-5">
@@ -264,6 +269,7 @@ export function QuickUser() {
               +8%
             </span>
             </div>
+           */}
           </div>
         </div>
       </div>

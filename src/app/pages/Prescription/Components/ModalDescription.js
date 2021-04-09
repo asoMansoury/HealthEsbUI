@@ -54,10 +54,12 @@ function ModalDescription(props) {
     const classes = useStyles();
     const [show, setShow] = useState(false);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [btnDisabled,setBtnDisabled]=useState('');
     const [item,setItem]=useState();
     const [rows,setRows] = useState([]);
     const handleClose = () => {
         setShow(false);
+        props.handleCloseModal();
     }
     const notifySuccess = ()=>toast('عملیات با موفقیت انجام گردید.',{duration:toastConfig.duration,style:toastConfig.successStyle});
     const notifyError = () => toast('خطا در ارتباط با سرور. اطلاعات بارگزاری نشد.', { duration: toastConfig.duration, style: toastConfig.errorStyle });
@@ -65,48 +67,56 @@ function ModalDescription(props) {
 
     const activeList =() =>{
         notifyInfo("در حال اکتیو کردن اقلام..");
+        setBtnDisabled('disabled');
+        setIsLoading(true);
         axios.post(ReActiveByPrescriptionIdApi,{PrescriptionId:item.prescriptionId})
         .then((response)=>{
-            notifyInfo(response.data.errorMessage);
-            props.handleConfirmModal();
+            setBtnDisabled('');
+            getData(item.prescriptionId);
+            notifySuccess();
+            setIsLoading(false);
         }).catch((error)=>{
+          setBtnDisabled('');
             notifyError();
         });
     }
-    const handleShow = () => {
+
+   const getData=(id)=>{
+      axios.post(GetPrescriptionBarcodeForActivationApi,{PrescriptionId:id})
+      .then((response)=>{
+          var tmp =[];
+          response.data.lstPrescriptionActivityRow.map((item,index)=>{
+            tmp.push(createData(1,
+              item.genericCode,
+              item.irc,
+              item.amount,
+              item.uid,
+              item.englishName,
+              item.trackingCode,
+              item.statusMessage,
+              item.prescriptionBarcodeStatusName));
+          });
+          setRows(tmp);
+          setIsLoading(false);
+      })
+     
+    }
+    const handleShow = (e) => {
+      var row = e.currentTarget.getAttribute("row");
+        var rowItem =JSON.parse(row);
+        setItem(JSON.parse(row));
         setIsLoading(true);
-        axios.post(GetPrescriptionBarcodeForActivationApi,{PrescriptionId:item.prescriptionId})
-        .then((response)=>{
-            var tmp =[];
-            response.data.lstPrescriptionActivityRow.map((item,index)=>{
-              tmp.push(createData(1,
-                item.genericCode,
-                item.irc,
-                item.amount,
-                item.uid,
-                item.englishName,
-                item.trackingCode,
-                item.statusMessage,
-                item.prescriptionBarcodeStatusName));
-            });
-            setRows(tmp);
-            notifySuccess();
-            setIsLoading(false);
-        })
         setShow(true);
+        getData(rowItem.prescriptionId);
     };
 
-    useEffect(()=>{
-        if(props.row!=undefined){
-            setItem(JSON.parse(props.row));
-        }
-    },props);
+
 
     
     return (
         <>
 
-            <span onClick={handleShow} className='pointer label label-lg label-light-success label-inline btn-height'>{props.title}</span>
+            <span onClick={handleShow} row={props.row} className='pointer label label-lg label-light-success label-inline btn-height'>{props.title}</span>
 
             <Modal dialogClassName="modal-90w"
                     show={show} onHide={handleClose}>
@@ -205,8 +215,11 @@ function ModalDescription(props) {
                     <Row >
                         <Col md='4'></Col>
                         <Col md='4'>
-                            <Button variant="primary" onClick={activeList}>
-                                اکتیو کن همه اقلام بالا را
+                            <Button variant="primary" onClick={activeList}
+                                    disabled={btnDisabled}
+                            >
+                              {btnDisabled!=='' ? "در حال انجام اکتیو..." : "اکتیو کن همه اقلام بالا را"}
+                                
                             </Button>
                         </Col>
                     </Row>

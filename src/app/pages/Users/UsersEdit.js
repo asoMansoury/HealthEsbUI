@@ -1,58 +1,32 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import { Hide_edit, Is_edited } from '../_redux/Actions/usersActions';
 import { connect } from "react-redux";
 import { SideBarConfig, toastConfig } from '../Config';
 import { Form, Row, Col, Button } from 'react-bootstrap';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
-import {AdminUserEditApi} from '../commonConstants/ApiConstants';
+import {AdminUserUpdateUserApi,AdminUserGetUserRoleApi} from '../commonConstants/apiUrls';
 import { fr } from 'date-fns/locale';
 import validator from 'validator';
 import DropDown from '../component/UI/DropDown';
 import { NumberToWords } from "persian-tools2";
-export class UsersEdit extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            leftSideBar: -SideBarConfig.width,
-            isLoading: false,
-            description: '',
-            dbid: -1,
-            title: '',
-            salaryTypeID:0,
-            employerTypeID:0,
-            showWorkPerDay:false
+import { useDispatch, useSelector } from "react-redux";
+import Select from 'react-select';
 
-        }
-        this.closeClick = this.closeClick.bind(this);
-        this.titleKeyUp = this.titleKeyUp.bind(this);
-        this.addressKeyUp=this.addressKeyUp.bind(this);
-        this.descriptionKeyUp = this.descriptionKeyUp.bind(this);
-        this.save = this.save.bind(this);
-
-        this.emailOnBlur= this.emailOnBlur.bind(this);
-        this.mobileOnBlur= this.mobileOnBlur.bind(this);
-        this.emploeryTypeChange = this.emploeryTypeChange.bind(this);
-        this.salaryTypeChange = this.salaryTypeChange.bind(this);
-        this.salaryPaymentKeyUp = this.salaryPaymentKeyUp.bind(this);
-
-        this.employerRef =React.createRef();
-        this.salaryTypeRef =React.createRef();
-        this.nameInputRef = React.createRef();
-        this.familyInputRef = React.createRef();
-        this.userNameInputRef = React.createRef();
-        this.emailInputRef=React.createRef();
-        this.mobileInputRef =React.createRef();
-        this.descriptionRef = React.createRef();
-        this.salaryPaymentRef=React.createRef();
-        this.salaryPaymentPersianRef = React.createRef();
-        this.workPerHourRef = React.createRef();
-        this.workPerDayRef = React.createRef();
-    }
-
-    
-    emailOnBlur(){
-        var email = this.emailInputRef.current.value;
+export function UsersEdit(props) {
+    const dispatch = useDispatch();
+    const reduxProps = useSelector(state=>state.users);
+    const [leftSideBar,setLeftSideBar] = React.useState(-SideBarConfig.width);
+    const [selectedRole,setSelectedRole]=useState([]);
+    const [selectedRoleID,setSelectedRoleID]=useState([]);
+    const [model,setModel] = useState({
+        userName:'',
+        email:'',
+        password:'',
+        id:''
+    });
+   function emailOnBlur(){
+        var email = model.email;
         if(email!==''){
             if(!validator.isEmail(email)){
                 this.notifyError("فرمت ایمیل صحیح نمی باشد.")
@@ -61,254 +35,177 @@ export class UsersEdit extends React.Component {
         }
         return true;
     }
-
-    
-    emploeryTypeChange(e){
-        this.setState({...this.state,employerTypeID:e.target.value})
+    function closeClick() {
+        dispatch(Hide_edit());
     }
-
-    salaryTypeChange(e){
-        this.setState({...this.state,salaryTypeID:e.target.value})
-    }
-
-    mobileOnBlur(){
-        var mobile = this.mobileInputRef.current.value;
-        if(mobile!==''){
-            if(!validator.isMobilePhone(mobile)){
-                this.notifyError("فرمت موبایل صحیح نمی باشد.");
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    salaryPaymentKeyUp(e){
-        var payment = e.target.value;
-        if(payment.toString()==='NaN'){
-            payment=0;
-        }
-        if(payment==='')
-            payment = 0;
-        e.target.value = parseInt(payment);
-        this.salaryPaymentPersianRef.current.value= NumberToWords.convert(payment)+' ریال';
-    }
-    closeClick() {
-        this.props.hideFunction();
-    }
-    showSideBar() {
-        this.nameInputRef.current.focus();
-
+    function showSideBar() {
         let frame = 20;
         let duration = SideBarConfig.animationDuration;
         let width = SideBarConfig.width;
         let step = width / duration * frame;
-        let left = this.state.leftSideBar;
+        let left = leftSideBar;
         let timer;
         timer = setInterval(() => {
             if (left >= 0) {
-                this.setState({ leftSideBar: 0 });
+                setLeftSideBar(0);
                 clearInterval(timer);
                 return;
             }
             left += step;
-            this.setState({ leftSideBar: left });
+            setLeftSideBar(left);
         }, frame);
     }
-    hideSideBar() {
+    function hideSideBar() {
         let frame = 20;
         let duration = SideBarConfig.animationDuration;
         let width = SideBarConfig.width;
         let step = width / duration * frame;
-        let left = this.state.leftSideBar;
+        let left = leftSideBar;
         let timer;
         timer = setInterval(() => {
             if (left <= -width) {
-                this.setState({ leftSideBar: -width });
+                setLeftSideBar(-width);
                 clearInterval(timer);
                 return;
             }
             left -= step;
-            this.setState({ leftSideBar: left });
+            setLeftSideBar(left);
         }, frame);
     }
-    notifySuccess = () => toast('کاربر با شناسه ' + this.state.dbid + ' با موفقیت ویرایش شد.', { duration: toastConfig.duration, style: toastConfig.successStyle });
-    notifyError = (error) => toast( error , { duration: toastConfig.duration, style: toastConfig.errorStyle });
-    notifyInfo = () => toast('در حال کاربر با شناسه ' + this.state.dbid + ' ...', { duration: toastConfig.duration, style: toastConfig.infoStyle });
-    save() {
-        if(!this.validate())
-            return;
-
-        let name = this.nameInputRef.current.value;
-        let family = this.familyInputRef.current.value;
-        let mobile = this.mobileInputRef.current.value;
-        let email = this.emailInputRef.current.value;
-        let userName = this.userNameInputRef.current.value;
-        let desc = this.descriptionRef.current.value;
-        let EmployeerTypeFK_ID = this.state.employerTypeID;
-        let SalaryTypeFK_ID = this.state.salaryTypeID;
-        let SalaryPayment = this.salaryPaymentRef.current.value;
-        var data = {
-            Email:email,
-            UserName:userName,
-            FirstName:name,
-            LastName:family,
-            Description:desc,
-            PhoneNumber:mobile,
-            EmployeerTypeFK_ID:EmployeerTypeFK_ID,
-            SalaryTypeFK_ID:SalaryTypeFK_ID,
-            ID: this.state.dbid,
-            SalaryPayment:SalaryPayment
+   const notifySuccess = () => toast('کاربر با شناسه ' + model.id + ' با موفقیت ویرایش شد.', { duration: toastConfig.duration, style: toastConfig.successStyle });
+   const notifyError = (error) => toast( error , { duration: toastConfig.duration, style: toastConfig.errorStyle });
+   const notifyInfo = () => toast('در حال ویرایش کاربر با شناسه ' + model.id + ' ...', { duration: toastConfig.duration, style: toastConfig.infoStyle });
+   const notifyNotValidateTitle = () => toast('عنوان وارد نشده است.', { duration: toastConfig.duration, style: toastConfig.errorStyle });
+   function passwordOnBlur(){
+        var password = model.password;
+        if(password===undefined||password===''){
+            notifyError("کلمه عبور الزامی می باشد.");
+            return false;
         }
-        axios.put(AdminUserEditApi, data)
+
+        return true;
+    }
+    function onChangeUserRole(e){
+        setSelectedRole(e);
+        if(e!=null){
+            var tmpArray=[];
+            e.map((item,index)=>{
+                tmpArray.push(item.value);
+            });
+            setSelectedRoleID(tmpArray);
+        }else{
+            setSelectedRoleID([]);
+        }
+      }
+   function save() {
+        if(!validate())
+            return;
+            var data = {
+                UserName:model.userName,
+                Email:model.email,
+                Password:model.password,
+                LstRoleId:selectedRoleID,
+                Id:model.id
+            }
+        axios.post(AdminUserUpdateUserApi, data)
             .then(res => {
                 if(res.data.hasError==false){
-                  this.notifySuccess();
-                  this.props.edited();
-
+                  notifySuccess();
+                  dispatch(Is_edited());
                 }else{
-                  this.notifyError(res.data.errorMessage);
+                  notifyError(res.data.errorMessage);
                 }
             })
             .catch(error => {
-                this.notifyError();
+                notifyError();
             });
-        this.props.hideFunction();
-        this.notifyInfo();
+        dispatch(Hide_edit());
+        notifyInfo();
     }
     
-    titleKeyUp(e) {
-        this.setState({ title: e.target.value });
-    }
-    descriptionKeyUp(e) {
-        this.setState({ description: e.target.value });
-    }
-    addressKeyUp(e){
-      this.setState({address:e.target.value});
-    }
-    componentWillReceiveProps(nextprops) {
-        if (nextprops.Show_Hide_Edit.type == 'Show_edit') {
-            this.showSideBar();
-            this.nameInputRef.current.focus();
-        }
-        else if (nextprops.Show_Hide_Edit.type == 'Hide_edit') {
-            this.hideSideBar();
-        }
-        debugger;
-        if(this.workPerDayRef.current!=undefined)
-            this.workPerDayRef.current.value = nextprops.Show_Hide_Edit.obj.maxWorkPerDay===undefined?0:nextprops.Show_Hide_Edit.obj.maxWorkPerDay;
-        if(this.workPerHourRef.current!=undefined)
-            this.workPerHourRef.current.value = nextprops.Show_Hide_Edit.obj.maxWorkPerHour===undefined?0:nextprops.Show_Hide_Edit.obj.maxWorkPerHour;
+    useEffect(()=>{
+        if (reduxProps.Show_Hide_Edit.type == 'Show_edit')  {
+            showSideBar();
+            var item = reduxProps.Show_Hide_Edit.obj.row;
+            setModel({
+                email:item.email,
+                userName:item.userName,
+                id:item.id
+            });
+            
+            var data ={
+                id:item.id
+            }
+            axios.post(AdminUserGetUserRoleApi,data).then((response)=>{
+                if(response.data.hasError===false){
+                    var tmpRole=[];
+                    var tmpRolesID=[];
+                    response.data.roles.map((item,index)=>{
+                          tmpRole.push({label:item.name,value:item.id});
+                          tmpRolesID.push(item.id);
+                    });
+                    setSelectedRole(tmpRole);
+                    setSelectedRoleID(tmpRolesID);
+                }
+            }).catch((error)=>{
 
-        this.nameInputRef.current.value = nextprops.Show_Hide_Edit.obj.name === undefined ? '' : nextprops.Show_Hide_Edit.obj.name;
-        this.familyInputRef.current.value = nextprops.Show_Hide_Edit.obj.family === undefined ? '' : nextprops.Show_Hide_Edit.obj.family;
-        this.userNameInputRef.current.value = nextprops.Show_Hide_Edit.obj.userName === undefined ? '' : nextprops.Show_Hide_Edit.obj.userName;
-        this.emailInputRef.current.value = nextprops.Show_Hide_Edit.obj.email === undefined ? '' : nextprops.Show_Hide_Edit.obj.email;
-        this.descriptionRef.current.value = nextprops.Show_Hide_Edit.obj.description === undefined ? '' : nextprops.Show_Hide_Edit.obj.description;
-        this.mobileInputRef.current.value=nextprops.Show_Hide_Edit.obj.mobile === undefined ? '':nextprops.Show_Hide_Edit.obj.mobile;
-        this.salaryPaymentRef.current.value=nextprops.Show_Hide_Edit.obj.salaryPayment === undefined ? 0:nextprops.Show_Hide_Edit.obj.salaryPayment;
-        this.salaryPaymentPersianRef.current.value= NumberToWords.convert(this.salaryPaymentRef.current.value)+' ریال';
-        this.setState({...this.state,
-            employerTypeID:nextprops.Show_Hide_Edit.obj.emplooyerID === undefined ? '':nextprops.Show_Hide_Edit.obj.emplooyerID,
-            salaryTypeID:nextprops.Show_Hide_Edit.obj.salaryID === undefined ? '':nextprops.Show_Hide_Edit.obj.salaryID
-        })
-        if (!this.props.Is_Edited && nextprops.Show_Hide_Edit.type != 'Hide_edit') {
-            this.setState({
-                description: nextprops.Show_Hide_Edit.obj.description,
-                dbid: parseInt(nextprops.Show_Hide_Edit.obj.id),
-                title: nextprops.Show_Hide_Edit.obj.title,
-                address:nextprops.Show_Hide_Edit.obj.address,
-            });
+            })
         }
+        else if (reduxProps.Show_Hide_Edit.type == 'Hide_edit')
+            hideSideBar();
+    },[reduxProps])
+   function validate(){
+    let hasError = false;
+    if(passwordOnBlur()===false){
+        hasError =true;
     }
-    notifyNotValidateTitle = () => toast('عنوان وارد نشده است.', { duration: toastConfig.duration, style: toastConfig.errorStyle });
-    
-    validate(){
-        let hasError = false;
-        if(this.nameInputRef.current.value.trim() === ''){
-            hasError = true;
-            this.notifyNotValidateTitle("نام وارد نشده است.");
-        }
-        if(this.familyInputRef.current.value.trim() === ''){
-            hasError = true;
-            this.notifyNotValidateTitle("نام خانوادگی وارد نشده است.");
-        }
-        if(this.userNameInputRef.current.value.trim() === ''){
-            hasError = true;
-            this.notifyNotValidateTitle("نام کاربری وارد نشده است.");
-        }
-        if(this.emailOnBlur()===false){
-            hasError=true;
-        }
-        if(this.mobileOnBlur()===false){
-            hasError=true;
-        }
-        return !hasError;
+    if(model.userName===''){
+        notifyError("نام کاربر الزامی می باشد.")
+        return false;
     }
-    render() {
+    if(model.email===''){
+        notifyError("ایمیل الزامی می باشد.");
+        return false;
+    }
+    if(emailOnBlur()===false){
+        hasError=true;
+    }
+    return !hasError;
+    }
         return (
-            <div className='category-add-container' style={{ left: this.state.leftSideBar + 'px', width: SideBarConfig.width + 'px' }}>
+            <div className='category-add-container' style={{ left: leftSideBar + 'px', width: SideBarConfig.width + 'px' }}>
                 <div className='category-add-header' style={{ gridTemplateColumns: (SideBarConfig.width / 2) + 'px ' + (SideBarConfig.width / 2) + 'px' }}>
                     <div className='category-add-close-btn-container'>
-                        <button className='category-add-close-btn' onClick={this.closeClick}>x</button>
+                        <button className='category-add-close-btn' onClick={closeClick}>x</button>
                     </div>
                     <div className='category-add-header-text'>ویرایش کاربر</div>
                 </div>
-                <div className='category-add-body'>
                     <div className='category-add-body'>
-                        <Form.Label className='custom-label bold'>نام</Form.Label>
-                        <Form.Control ref={this.nameInputRef} className='form-control-custom' type="Name" aria-required={true} />
-                        
-                        <Form.Label className='custom-label bold'>نام خانوادگی </Form.Label>
-                        <Form.Control ref={this.familyInputRef} className='form-control-custom' type="Name" aria-required={true} />
-                        
-                        <Form.Label className='custom-label bold'>نام کاربری</Form.Label>
-                        <Form.Control ref={this.userNameInputRef} className='form-control-custom' type="Name" aria-required={true} />
+                    <Form.Label className='custom-label bold'>نام کاربری</Form.Label>
+                    <Form.Control  className='form-control-custom' value={model.userName} type="Name" aria-required={true} onChange={(e)=>setModel({...model,userName:e.target.value})} />
 
-                        <Form.Label className='custom-label bold'>ایمیل</Form.Label>
-                        <Form.Control ref={this.emailInputRef} className='form-control-custom' onBlur={this.emailOnBlur} type="Name" aria-required={true} />
-                        
-                        <Form.Label className='custom-label bold'>شماره تلفن</Form.Label>
-                        <Form.Control ref={this.mobileInputRef} className='form-control-custom' onBlur={this.mobileOnBlur} type="Name" aria-required={true} />
-                        
-                        <Form.Label className='custom-label bold'>نوع کارمند</Form.Label>
-                        <DropDown source={this.props.emplooyerTypeSource} SelectedID={this.state.employerTypeID} 
-                                    onChange={this.emploeryTypeChange} 
-                                    className='form-control-custom' type="Name" aria-required={true} />
+                    <Form.Label className='custom-label bold'>ایمیل</Form.Label>
+                    <Form.Control  className='form-control-custom' type="Name" value={model.email} onBlur={emailOnBlur} aria-required={true} onChange={(e)=>setModel({...model,email:e.target.value})}/>
+                    
+                    <Form.Label className='custom-label bold' onChange={(e)=>setModel({...model,userName:e.target.value})}>نقش کاربر</Form.Label>
+                    <Select
+                            value={selectedRole}
+                            onChange={onChangeUserRole}
+                            isRtl={true}
+                            isSearchable={true}
+                            closeMenuOnSelect={false}
+                            isMulti
+                            options={props.rolesSource}/>
+                    <Form.Label className='custom-label bold'>کلمه عبور</Form.Label>
+                    <Form.Control className='form-control-custom' value={model.password} onChange={(e)=>setModel({...model,password:e.target.value})} type="Password" aria-required={true} />
 
-                        <Form.Label className='custom-label bold'>روش پرداخت دستمزد</Form.Label>
-                        <DropDown source={this.props.salaryTypeResource}  SelectedID={this.state.salaryTypeID} 
-                                    onChange={this.salaryTypeChange} 
-                                    className='form-control-custom' type="Name2" aria-required={true} />
-
-                        <Form.Label className='custom-label bold'>دستمزد روزانه/ماهیانه</Form.Label>
-                        <Form.Control ref={this.salaryPaymentRef} className='form-control-custom' onKeyUp={this.salaryPaymentKeyUp} type="Name" aria-required={true} />
-                        <Form.Control disabled='disabled' ref={this.salaryPaymentPersianRef} className='form-control-custom' type="Name" aria-required={true} />
-
-
-                        {this.state.salaryTypeID===15?
-                            <>
-                                <Form.Label className='custom-label bold'>روز کار</Form.Label>
-                                <Form.Control ref={this.workPerDayRef} className='form-control-custom' onKeyUp={this.workDayOnKeyUp} type="Name" aria-required={true} />
-                            </>
-                            :
-                            <>             
-                                <Form.Label className='custom-label bold'>ساعت کار</Form.Label>
-                                <Form.Control ref={this.workPerHourRef} className='form-control-custom' onKeyUp={this.workHoutKeyUp} type="Name" aria-required={true} />
-                            </>
-                        }
-
-                        <Form.Label className='custom-label marg-t-20 bold'>توضیحات</Form.Label>
-                        <Form.Control ref={this.descriptionRef} className='form-control-custom' as="textarea" rows="4" />
                     </div>
-                </div>
                 <div className='category-add-footer'>
-                    <div className='btn-custom btn-custom-save' onClick={this.save}>ذخیره</div>
-                    <div className='btn-custom btn-custom-cancel' onClick={this.closeClick}>انصراف</div>
+                    <div className='btn-custom btn-custom-save' onClick={save}>ذخیره</div>
+                    <div className='btn-custom btn-custom-cancel' onClick={closeClick}>انصراف</div>
                 </div>
             </div>
         );
-    }
 }
 
 const mapStateToProps = (state => {

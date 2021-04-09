@@ -11,7 +11,7 @@ export function Routes() {
     return (
         <HashRouter basename="/">
         <Switch>
-            {tokenObject.Token!==''? (
+            {tokenObject.Token===''? (
                 /*Render auth page when user at `/auth` and not authorized.*/
                 <Route>
                     <AuthPage />

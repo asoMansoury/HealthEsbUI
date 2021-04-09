@@ -10,6 +10,7 @@ import usersReducer from '../app/pages/_redux/Reducers/usersSlice';
 import processReducer from '../app/pages/_redux/Reducers/processSlice';
 import tokenReducer from '../app/pages/_redux/Reducers/TokenSlice';
 import categoryReducer from '../app/pages/_redux/Reducers/categorySlice';
+import rolesResuce from '../app/pages/_redux/Reducers/rolesSlice';
 
 export const rootReducer = combineReducers({
   auth: auth.reducer,
@@ -19,6 +20,7 @@ export const rootReducer = combineReducers({
   specifications: specificationsSlice.reducer,
   category : categoryReducer,
   users:usersReducer,
+  roles:rolesResuce,
   process:processReducer,
   tokenReducer:tokenReducer
 });

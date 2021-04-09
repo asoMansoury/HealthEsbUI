@@ -2,36 +2,33 @@ import React from 'react';
 import UsersList from './UsersList';
 import UsersAdd from './UsersAdd';
 import UsersEdit from './UsersEdit';
-import {emplooyerCode,salaryTypeCode} from '../commonConstants/commonConstants';
 import axios from 'axios';
-import {GeneralParamterGetChildsByParentsApi} from '../commonConstants/ApiConstants';
+import {AdminUserGetRolesApi} from '../commonConstants/apiUrls';
 
 export class UsersPage extends React.Component {
     constructor(){
         super();
         this.state = {
-            emplooyerTypeSource:[],
-            salaryTypeResource:[]
+            rolesSource:[]
         }
         this.fillDropDownsData = this.fillDropDownsData.bind(this);
         this.fillDropDownsData();
     }
 
     fillDropDownsData(){
-        let api= GeneralParamterGetChildsByParentsApi+"?Code="+emplooyerCode+"&Code="+salaryTypeCode;
-        const emplooyerTypeArray=[];
-        const salaryTypeArray=[];
-        axios.get(api).then((res)=>{
+        let api= AdminUserGetRolesApi;
+        const roleTempArray=[];
+        axios.post(api,{}).then((res)=>{
             if(res.data.hasError==false){
-                res.data.generalParamterDtos.map((item,index)=>{
-                    if(item.parentCode===emplooyerCode)
-                        emplooyerTypeArray.push(item);
-                    else if(item.parentCode===salaryTypeCode)
-                        salaryTypeArray.push(item);
+                res.data.roles.map((item,index)=>{
+                    var obj ={
+                        label:item.name,
+                        value:item.id
+                      };
+                      roleTempArray.push(obj);
                 })
                 this.setState({...this.state,
-                    emplooyerTypeSource:emplooyerTypeArray,
-                    salaryTypeResource:salaryTypeArray
+                    rolesSource:roleTempArray
                 });
             }
         })
@@ -43,12 +40,10 @@ export class UsersPage extends React.Component {
                 <>
                     <UsersList></UsersList>
                     <UsersAdd
-                        emplooyerTypeSource={this.state.emplooyerTypeSource}
-                        salaryTypeResource={this.state.salaryTypeResource}
+                        rolesSource={this.state.rolesSource}
                     ></UsersAdd>
                     <UsersEdit
-                        emplooyerTypeSource={this.state.emplooyerTypeSource}
-                        salaryTypeResource={this.state.salaryTypeResource}
+                        rolesSource={this.state.rolesSource}
                     ></UsersEdit>
                 </>
             );

@@ -13,8 +13,11 @@ import {QuickPanel} from "./extras/offcanvas/QuickPanel";
 import {QuickUser} from "./extras/offcanvas/QuickUser";
 import {ScrollTop} from "./extras/ScrollTop";
 import {StickyToolbar} from "./extras/StickyToolbar";
+// import { QuickUserToggler } from "../extras/QuiclUserToggler";
+import { shallowEqual, useSelector,useDispatch } from "react-redux";
 
 export function Layout({ children }) {
+    const tokenObject = useSelector(state=>state.tokenReducer.TokenObject);
     const uiService = useHtmlClassService();
     // Layout settings (cssClasses/cssAttributes)
     const layoutProps = useMemo(() => {
@@ -22,7 +25,7 @@ export function Layout({ children }) {
             layoutConfig: uiService.config,
             selfLayout: objectPath.get(uiService.config, "self.layout"),
             asideDisplay: objectPath.get(uiService.config, "aside.self.display"),
-            subheaderDisplay: objectPath.get(uiService.config, "subheader.none"),
+            subheaderDisplay: objectPath.get(uiService.config, "subheader.display"),
             desktopHeaderDisplay: objectPath.get(
                 uiService.config,
                 "header.self.fixed.desktop"
@@ -49,7 +52,7 @@ export function Layout({ children }) {
                             id="kt_content"
                             className={`content ${layoutProps.contentCssClasses} d-flex flex-column flex-column-fluid`}
                         >
-                            {layoutProps.subheaderDisplay && <SubHeader/>}
+                            {/* {layoutProps.subheaderDisplay && <SubHeader/>} */}
                             {/*begin::Entry*/}
                             {!layoutProps.contentExtended && (
                                 <div className="d-flex flex-column-fluid">
@@ -71,8 +74,8 @@ export function Layout({ children }) {
                 </div>
                 {/*end::Page*/}
             </div>
-            <QuickUser/>
-            <QuickPanel/>
+            <QuickUser tokenObject={tokenObject}/>
+            {/* <QuickPanel/> */}
             <ScrollTop/>
             {/* <StickyToolbar/> */}
             {/*end::Main*/}

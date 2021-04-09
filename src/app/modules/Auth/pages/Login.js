@@ -73,7 +73,7 @@ export function Login(props) {
         axios.post(AdminUserLoginApi,data).then((response)=>{
           if(response.data.hasError==false){
             disableLoading();
-            tokenDispatch(Token.Save_Token(response.data.userDto));
+            tokenDispatch(Token.Save_Token(response.data.users[0]));
             setShowModal(false);
           }else{
             setErrorMessage(response.data.errorMessage);

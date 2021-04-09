@@ -11,8 +11,6 @@ const checkRequests= (Wrapped,axios) => {
         const notifyError = (title) => toast(title , { duration: toastConfig.duration, style: toastConfig.errorStyle });
         const tokenDispatch = useDispatch();
         axios.interceptors.request.use(request=>{
-            
-
           if (token) {
             request.headers.Authorization = "Bearer "+tokenObj;
             }
@@ -21,14 +19,15 @@ const checkRequests= (Wrapped,axios) => {
         axios.interceptors.response.use(response=>{
             return response;
         },error=>{
-            if(error.response.status===400){
-                if(error.response.data.code==="TNA"){
-                    notifyError("نشست کاری شما منقضی شده است، لطفا مجددا وارد سامانه شوید.");
-                    tokenDispatch(Token.Save_Token({token:''}))
-                }else if(error.response.data.code==='NHA'){
-                    notifyError(error.response.data.errorMessage);
-                }
-            }
+            
+            // if(error.response.status===400){
+            //     if(error.response.data.code==="TNA"){
+            //         notifyError("نشست کاری شما منقضی شده است، لطفا مجددا وارد سامانه شوید.");
+            //         tokenDispatch(Token.Save_Token({token:''}))
+            //     }else if(error.response.data.code==='NHA'){
+            //         notifyError(error.response.data.errorMessage);
+            //     }
+            // }
         })
 
         return (

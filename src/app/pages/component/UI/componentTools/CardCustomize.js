@@ -141,7 +141,7 @@ export const Card = forwardRef(({ fluidHeight, className, ...props }, ref) => (
     {...props}
     ref={ref}
     className={clsx(
-      "card card-custom gutter-b",
+      "card card-custom",
       { "card-height-fluid": fluidHeight },
       className
     )}

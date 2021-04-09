@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { toAbsoluteUrl, checkIsActive } from "../../../../_helpers";
 import {processListPath
-        ,processPath
+        ,rolesPath
         ,usersPath
         ,PrescriptionBarcodeDetailesPath
     } from '../../../../../app/pages/commonConstants/RouteConstant';
@@ -21,6 +21,57 @@ export function HeaderMenu({ layoutProps }) {
     >
         {/*begin::Header Nav*/}
         <ul className={`menu-nav ${layoutProps.ulClasses}`}>
+
+                        {/*end::1 Level*/}
+                        {/*begin::1 Level*/}
+                        <li
+                data-menu-toggle={layoutProps.menuDesktopToggle}
+                aria-haspopup="true"
+                className={`menu-item menu-item-submenu menu-item-rel ${getMenuItemActive('/')}`}>
+                <NavLink className="menu-link menu-toggle" to="/">
+                    <span className="menu-text">بخش امنیت</span>
+                    <i className="menu-arrow"></i>
+                </NavLink>
+                <div className="menu-submenu menu-submenu-classic menu-submenu-left">
+
+                <div className="menu-submenu menu-submenu-classic menu-submenu-left">
+                <ul className="menu-subnav">
+                        {/*begin::2 Level*/}
+                        <li
+                            className={`menu-item menu-item-submenu ${getMenuItemActive(usersPath)}`}
+                            data-menu-toggle="hover"
+                            aria-haspopup="true">
+                            <NavLink className="menu-link" to={usersPath}>
+                                <span className="svg-icon menu-icon">
+                                    <SVG src={toAbsoluteUrl("/media/svg/icons/Layout/Layout-left-panel-1.svg")} />
+                                </span>
+                                <span className="menu-text">
+                                     مدیریت کاربران
+                                </span>
+                            </NavLink>
+                        </li>
+                        {/*end::2 Level*/}
+                                                {/*begin::2 Level*/}
+                                                <li
+                            className={`menu-item menu-item-submenu ${getMenuItemActive(rolesPath)}`}
+                            data-menu-toggle="hover"
+                            aria-haspopup="true">
+                            <NavLink className="menu-link" to={rolesPath}>
+                                <span className="svg-icon menu-icon">
+                                    <SVG src={toAbsoluteUrl("/media/svg/icons/Layout/Layout-left-panel-1.svg")} />
+                                </span>
+                                <span className="menu-text">
+                                     مدیریت نقش ها
+                                </span>
+                            </NavLink>
+                        </li>
+                        {/*end::2 Level*/}
+                    </ul>
+                </div>
+
+                </div>
+            </li>
+            {/*end::1 Level*/}
             {/*begin::1 Level*/}
             <li
                 data-menu-toggle={layoutProps.menuDesktopToggle}
@@ -45,7 +96,7 @@ export function HeaderMenu({ layoutProps }) {
                                         <SVG src={toAbsoluteUrl("/media/svg/icons/Layout/Layout-left-panel-1.svg")} />
                                     </span>
                                     <span className="menu-text">
-                                        اصالت دارو
+                                        تاریخچه درخواست های ارسالی
                                     </span>
                                 </NavLink>
                             </li>
@@ -54,41 +105,7 @@ export function HeaderMenu({ layoutProps }) {
                     </div>
                 </div>
             </li>
-            {/*end::1 Level*/}
-                        {/*begin::1 Level*/}
-                        <li
-                data-menu-toggle={layoutProps.menuDesktopToggle}
-                aria-haspopup="true"
-                className={`menu-item menu-item-submenu menu-item-rel ${getMenuItemActive('/')}`}>
-                <NavLink className="menu-link menu-toggle" to="/">
-                    <span className="menu-text">مدیریت کاربران</span>
-                    <i className="menu-arrow"></i>
-                </NavLink>
-                <div className="menu-submenu menu-submenu-classic menu-submenu-left">
 
-                <div className="menu-submenu menu-submenu-classic menu-submenu-left">
-                <ul className="menu-subnav">
-                        {/*begin::2 Level*/}
-                        <li
-                            className={`menu-item menu-item-submenu ${getMenuItemActive(usersPath)}`}
-                            data-menu-toggle="hover"
-                            aria-haspopup="true">
-                            <NavLink className="menu-link" to={usersPath}>
-                                <span className="svg-icon menu-icon">
-                                    <SVG src={toAbsoluteUrl("/media/svg/icons/Layout/Layout-left-panel-1.svg")} />
-                                </span>
-                                <span className="menu-text">
-                                     مدیریت کاربران
-                                </span>
-                            </NavLink>
-                        </li>
-                        {/*end::2 Level*/}
-                    </ul>
-                </div>
-
-                </div>
-            </li>
-            {/*end::1 Level*/}
         </ul>
         {/*end::Header Nav*/}
     </div>;

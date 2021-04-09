@@ -102,7 +102,7 @@
         "react-router-dom": "^5.1.2",
         "react-router-transition": "^2.1.0",
         "react-scripts": "3.2.0",
-        "react-select": "3.1.0",
+        "react-select": "^3.1.0",
         "react-select-search": "^3.0.2",
         "react-stylesheet": "^2.2.2",
         "react-swipeable-views": "0.13.9",

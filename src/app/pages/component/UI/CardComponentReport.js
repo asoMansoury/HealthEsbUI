@@ -64,7 +64,7 @@ export function CardComponentReport(props) {
           customStyle={customStyle}
         />
       </CardBody>
-      <CardFooter></CardFooter>
+      <CardFooter>{props.footerRender}</CardFooter>
     </Card>
   );
 }

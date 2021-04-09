@@ -6,10 +6,12 @@ import {DashboardPage} from "./pages/DashboardPage";
 import {CategoryPage} from "./pages/Category/CategoryPage";
 import {categoryPath
   ,usersPath
+  ,rolesPath
   ,processPath
   ,processEditPath
   ,processListPath
   ,ProcessPDFPath
+  ,rolesGrantPath
   ,PrescriptionBarcodeDetailesPath
 } from './pages/commonConstants/RouteConstant';
 import UsersPage from './pages/Users/UsersPage';
@@ -19,6 +21,9 @@ import ProcessEdit from './pages/ProcessPage/ProcessPageEdit';
 import ProcessPDF from './pages/ProcessPage/Components/ProcessPDF';
 import PrescriptionBarcodeDetailes from './pages/Prescription/PrescriptionBarcodeDetailes';
 import {spring, AnimatedSwitch } from 'react-router-transition';
+
+const RolesPage=React.lazy(()=>import('./pages/Roles/RolesPage'));
+const RoleGrantPage = React.lazy(()=>import('./pages/Roles/RolesGrant'));
 const testLaze = React.lazy(()=>import('./pages/Prescription/PrescriptionBarcodeDetailes'));
 const TouralProcesPage = lazy(()=>
   import("./modules/TouralPages/TouralProcessPage")
@@ -94,7 +99,8 @@ export default function BasePage() {
                 }></ContentRoute> */}
                 <ContentRoute path={categoryPath} component={CategoryPage} />
                 <ContentRoute path={usersPath} component={UsersPage}></ContentRoute>
-
+                <ContentRoute path={rolesPath} component={RolesPage}></ContentRoute>
+                <ContentRoute path={rolesGrantPath} component={RoleGrantPage}></ContentRoute>
                 <ContentRoute path={processPath} component={ProcessAdd}></ContentRoute>
                 <ContentRoute path={processListPath} component={ProcessPageList}></ContentRoute>
                 <ContentRoute path={processEditPath} component={ProcessEdit}></ContentRoute>

@@ -69,7 +69,7 @@ export function SubHeader() {
             </div>
 
 
-            <BreadCrumbs items={subheader.breadcrumbs} />
+            {/* <BreadCrumbs items={subheader.breadcrumbs} /> */}
           </div>
 
           {/* Toolbar */}

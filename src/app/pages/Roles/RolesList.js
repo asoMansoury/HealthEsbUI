@@ -1,15 +1,11 @@
 import React, { useEffect } from 'react';
-import deleteImage from '../pulseDesignImages/delete.svg';
-import CategoryModalDelete from './UsersModalDelete';
-import CategoryModalEdit from '../Category/CategoryModalEdit';
+import RolesModalDelete from './RolesModalDelete';
 import {CardComponent} from '../component/UI/CardComponent'
 import Skeleton from 'react-loading-skeleton';
 import editImage from '../pulseDesignImages/edit1.svg';
 import { Form, Row, Col, Button,FormGroup } from 'react-bootstrap';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import { faIR } from '@material-ui/core/locale';
-import Checkbox from '@material-ui/core/Checkbox';
-import { Preloader, Oval } from 'react-preloader-icon';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -18,11 +14,12 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import EnhancedTableHead from '../component/UI/EnhancedTableHead';
+import BuildIcon from '@material-ui/icons/Build';
 import { tableConfig,toastConfig } from '../Config';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { connect } from "react-redux";
-import {AdminUsergetUsersApi} from '../commonConstants/apiUrls';
+import {AdminUserGetRolesApi} from '../commonConstants/apiUrls';
 import { Show_add, Show_edit, Is_not_edited, Is_not_deleted_one, Is_not_deleted_group, Is_not_added } from '../_redux/Actions/usersActions';
 import { useDispatch, useSelector } from "react-redux";
 import UsersModalDeleteGroup from './UsersModalDeleteGroup';
@@ -30,13 +27,12 @@ import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import Toolbar from '@material-ui/core/Toolbar';
 import DropDown from '../component/UI/DropDown';
-
-
+import {rolesGrantPath} from '../commonConstants/RouteConstant'
+import { useHistory } from 'react-router-dom';
 
 const headRows = [
   { id: 'id', numeric: true, disablePadding: true, label: 'شناسه' },
-  { id: 'description', numeric: false, disablePadding: false, label: 'نام کاربری' },
-  { id: 'mobile', numeric: true, disablePadding: false, label: 'ایمیل' },
+  { id: 'description', numeric: false, disablePadding: false, label: 'نام نقش' },
   { id: 'actions', numeric: false, disablePadding: false, label: 'عملگر ها' },
 ];
   
@@ -106,7 +102,7 @@ const headRows = [
             </Typography>
           ) : (
               <Typography variant="h6" id="tableTitle">
-                <span className='tabelhead'>لیست کاربران</span>
+                <span className='tabelhead'>لیست نقش ها</span>
               </Typography>
             )}
         </div>
@@ -116,7 +112,7 @@ const headRows = [
             <UsersModalDeleteGroup selected={props.selected} />
           )
             :
-            (<Button onClick={addCategoryShow} className='btn-height2 create-btn' variant="info">افزودن کاربر</Button>)}
+            (<Button onClick={addCategoryShow} className='btn-height2 create-btn' variant="info">افزودن نقش</Button>)}
         </div>
       </Toolbar>
     );
@@ -156,7 +152,7 @@ const headRows = [
 
 
   
-  export function UsersList(props) {
+  export function RolesList(props) {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
@@ -172,32 +168,15 @@ const headRows = [
     const [srchTitle, setSrchTitle] = React.useState('');
     const reduxProps = useSelector(state=>state.users);
     const [isDeletingGroup, setIsDeletingGroup] = React.useState(false);
+    const history = useHistory();
     const [searchModel,setSearchModel] = React.useState({
-      UserName:'',
+      Name:'',
     })
     const dispatch = useDispatch();
-    function getSearchModel(){
-      var model = searchModel;
-      var rules=[];
-      if(model.UserName!=='')
-      {
-        var obj = {
-          field:'UserName',
-          op:11,
-          data:model.UserName
-        }
-        rules.push(obj);
-      }
-      var data = {
-        groupOp:0,
-        groups:null,
-        rules:rules
-      }
-      return JSON.stringify(data);
-    }
+
     const notifyError = () => toast('خطا در ارتباط با سرور. اطلاعات بارگزاری نشد.', { duration: toastConfig.duration, style: toastConfig.errorStyle });
-    function createData(id, userName,email) {
-      return {  id,userName,email};
+    function createData(id, name) {
+      return {  id,name};
     }
 
     const setFakeData = (count) => {
@@ -295,19 +274,19 @@ const headRows = [
       var data = {
         PageNum:page,
         PageSize:nRows,
-        Filter:getSearchModel(),
+        Name:searchModel.Name,
         IsRequestCount :true
       }
-      axios.post(AdminUsergetUsersApi,data)
+      axios.post(AdminUserGetRolesApi,data)
         .then(res=>{
-          let result = res.data.users;
+          let result = res.data.roles;
           setCount(res.data.lstCount);
           let temp = [];
           for (let i = 0; i < nRows * (page - 1); i++) {
             temp.push({});
           }
           result.forEach(item => {
-            temp.push(createData(item.id,item.userName,item.email))
+            temp.push(createData(item.id,item.name))
           });
           setRows(temp);
           setIsLoading(false);
@@ -338,6 +317,13 @@ const headRows = [
         });
     }
 
+    function grantRole(e){
+      let id = e.currentTarget.getAttribute('dbid');
+      history.push({
+        pathname:rolesGrantPath,
+        state:{data:id}
+      });
+    }
     const btnSearch=(e)=>{
       getData(tableConfig.rowsPerPageDefault, 1, '', false, false, false);
       setPage(0);
@@ -351,8 +337,8 @@ const headRows = [
               <FormGroup>
                 <Row>
                     <Col md='4'>
-                      <Form.Label className='custom-label marg-t-20 bold'>نام کاربری</Form.Label>
-                      <Form.Control onChange={(e)=>setSearchModel({...searchModel,UserName:e.target.value})}  className='form-control-custom' as="input" />
+                      <Form.Label className='custom-label marg-t-20 bold'>نام</Form.Label>
+                      <Form.Control onChange={(e)=>setSearchModel({...searchModel,Name:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
                     <Col md='2'  style={{marginTop: '40px'}}>
                     <Form.Label className='custom-label marg-t-20 bold'></Form.Label>
@@ -363,6 +349,7 @@ const headRows = [
           </CardComponent>
         </div>
       </div>
+      
       <div className={classes.root}>
       <CardComponent>
         <ThemeProvider theme={theme}>
@@ -409,20 +396,15 @@ const headRows = [
                           <TableCell align="center">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              {row.userName}
+                              {row.name}
                             </div>
                           </TableCell>
                           <TableCell align="center">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                              {row.email}
-                            </div>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
-                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
+                            <div className="delete-img-con btn-for-select"  dbid={row.id} userRow={row} onClick={grantRole} ><BuildIcon style={{color: '#6610f2'}}></BuildIcon> </div>
                               <div className="delete-img-con btn-for-select" dbid={row.id}  userRow={JSON.stringify(row)} onClick={editShowSlider} ><img className='edit-img btn-for-select' src={editImage} /></div>
-                              <CategoryModalDelete dbid={row.id} name={row.title} />
+                              <RolesModalDelete dbid={row.id} name={row.name} />
                             </div>
                           </TableCell>
                         </TableRow>
@@ -483,4 +465,4 @@ const mapDispatchToProps = (dispatch) => ({
   notAdded: () => dispatch(Is_not_added()),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(UsersList);
+export default connect(mapStateToProps, mapDispatchToProps)(RolesList);

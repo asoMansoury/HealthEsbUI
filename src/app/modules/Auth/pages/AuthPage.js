@@ -53,7 +53,6 @@ export function AuthPage() {
                 {/* start:: Aside footer for desktop */}
                 <div className="d-none flex-column-auto d-lg-flex justify-content-between mt-10">
                   <div className="opacity-70 font-weight-bold	text-white">
-                    &copy; asanito
                   </div>
                   {/* <div className="d-flex">
                     <Link to="/terms" className="text-white">

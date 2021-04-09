@@ -23,15 +23,16 @@ import toast, { Toaster } from 'react-hot-toast';
 import { toastConfig } from '../Config';
 import EnhancedTableHead from '../component/UI/EnhancedTableHead';
 import {DatePickerComponent} from '../component/DatePickerComponent/DatePickerComponent';
+import checkRequests from '../component/ErrroHandling';
 import moment from 'moment-jalaali';
 
-function createData(rowNumber, patientNationalCode, patientGivenName, patientSurname, 
+function createData(rowNumber,outPrescriptionId, patientNationalCode, patientGivenName, patientSurname, 
                   medicalCouncilNumber,physicianSurname,pharmacyGln,createdDate,status,
                   statusMessage,rowData) {
   var fullName = patientGivenName+' '+patientSurname;
   var rowItem = JSON.stringify(rowData);
   createdDate=moment(createdDate).format('jYYYY-jMM-jDD HH:mm:ss');
-  return { rowNumber, patientNationalCode, fullName, medicalCouncilNumber, physicianSurname,pharmacyGln,createdDate,
+  return { rowNumber,outPrescriptionId, patientNationalCode, fullName, medicalCouncilNumber, physicianSurname,pharmacyGln,createdDate,
           status,statusMessage,rowItem };
 }
 
@@ -61,6 +62,7 @@ function getSorting(order, orderBy) {
 
 const headRows = [
   { id: 'id', numeric: true, disablePadding: true, label: '#' },
+  { id: 'prescriptionId', numeric: false, disablePadding: true, label: 'شماره نسخه' },
   { id: 'title', numeric: false, disablePadding: true, label: 'کدملی' },
   { id: 'description', numeric: false, disablePadding: false, label: 'نام بیمار' },
   { id: 'createDate', numeric: false, disablePadding: false, label: 'کد نظام' },
@@ -77,11 +79,10 @@ const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth:'2000px',
-    marginTop: theme.spacing(3),
   },
   paper: {
     width: '100%',
-    marginBottom: theme.spacing(2),
+    
   },
   table: {
     minWidth: 750,
@@ -137,15 +138,14 @@ export function PrescriptionBarcodeDetailes(props) {
 
   useEffect(() => {
     let paginationArrows = Array.from(document.getElementsByTagName('div')).find(x => x.className.includes('MuiTablePagination-actions'));
-    paginationArrows.style.position = 'absolute';
   });
   useEffect(() => {
     setFakeData(tableConfig.rowsPerPageDefault);
-    getSearchResult();
+    getSearchResult(page,rowsPerPage);
   }, []);
   useEffect(() => {
     if (props.Is_Edited || props.Is_Deleted_One || props.Is_Added) {
-      getSearchResult();
+      getSearchResult(page,rowsPerPage);
       props.notEdited();
       props.notDeletedOne();
       props.notAdded();
@@ -154,7 +154,7 @@ export function PrescriptionBarcodeDetailes(props) {
     }
     else if (props.Is_Deleted_Group) {
       setIsLoading(true);
-      getSearchResult();
+      getSearchResult(page,rowsPerPage);
       props.notDeletedGroup();
       setPage(0);
       setSelected([]);
@@ -173,7 +173,7 @@ export function PrescriptionBarcodeDetailes(props) {
     setFakeData(count);
     setIsLoading(true);
     setPage(newPage);
-    getSearchResult();
+    getSearchResult(newPage,rowsPerPage);
   }
 
   function handleChangeRowsPerPage(event) {
@@ -183,7 +183,7 @@ export function PrescriptionBarcodeDetailes(props) {
     setIsLoading(true);
     setRowsPerPage(event.target.value);
     setPage(0);
-    getSearchResult();
+    getSearchResult(page,event.target.value);
   }
 
   function getSearchModel(){
@@ -245,7 +245,8 @@ export function PrescriptionBarcodeDetailes(props) {
     }
     return JSON.stringify(data);
   }
-  function getSearchResult(){
+
+  function getSearchResult(page,rowsPerPage){
     var model = getSearchModel();
     var data = {
       pageNum: page+1,
@@ -263,6 +264,7 @@ export function PrescriptionBarcodeDetailes(props) {
       }
       result.forEach(item => {
         temp.push(createData(item.id, 
+          item.outPrescriptionId,
           item.patientNationalCode, 
           item.patientGivenName, 
           item.patientSurname, 
@@ -283,11 +285,15 @@ export function PrescriptionBarcodeDetailes(props) {
   }
 
   function searchBtn(e){
-    getSearchResult();
+    getSearchResult(page,rowsPerPage);
   }
 
  function handleConfirmModal(){
-    getSearchResult();
+  getSearchResult(page,rowsPerPage);
+  }
+
+  function handleCloseModal(){
+    getSearchResult(page,rowsPerPage);
   }
   const isSelected = id => selected.indexOf(id) !== -1;
 
@@ -317,6 +323,7 @@ export function PrescriptionBarcodeDetailes(props) {
                       <Form.Control onChange={(e)=>setSearchModel({...searchModel,UID:e.target.value})}  className='form-control-custom' as="input" />
                     </Col>
                 </Row>
+                
                 <Row>
                     <Col md='2'>
                       <Form.Label className='custom-label marg-t-20 bold'>تاریخ ثبت از</Form.Label>
@@ -379,6 +386,12 @@ export function PrescriptionBarcodeDetailes(props) {
                           <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
+                              {row.outPrescriptionId}
+                            </div>
+                          </TableCell>
+                          <TableCell className={classes.cell_short} align="right">
+                            <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
+                            <div style={{ display: !isLoading ? 'block' : 'none' }}>
                               {row.patientNationalCode}
                             </div>
                           </TableCell>
@@ -436,9 +449,9 @@ export function PrescriptionBarcodeDetailes(props) {
                           <TableCell className={classes.cell_short} align="right">
                             <Skeleton duration={1} style={{ width: '100%', display: isLoading ? 'block' : 'none', height: '20px' }} />
                             <div style={{ display: !isLoading ? 'block' : 'none' }}>
-                            <ModalDescription handleConfirmModal={handleConfirmModal} row={row.rowItem} dbid={row.id} title="جزئیات" headerTitle="لیست اقلام نسخه" name={row.title} text={row.description} />
+                            <ModalDescription handleConfirmModal={handleConfirmModal} handleCloseModal={handleCloseModal} row={row.rowItem} dbid={row.id} title="جزئیات" headerTitle="لیست اقلام نسخه" name={row.title} text={row.description} />
                             <div style={{marginTop:'10px'}}></div>
-                            <ModalDescription row={row.rowItem}  dbid={row.id} title="ورودیها" headerTitle="ورودیها" name={row.title} text={row.description} />
+                            <ModalDescription handleConfirmModal={handleConfirmModal} handleCloseModal={handleCloseModal} row={row.rowItem} dbid={row.id} title="ورودیها" headerTitle="لیست اقلام نسخه" name={row.title} text={row.description} />
                             </div>
                           </TableCell>
                         </TableRow>
@@ -478,4 +491,4 @@ export function PrescriptionBarcodeDetailes(props) {
   );
 }
 
-export default PrescriptionBarcodeDetailes
+export default  PrescriptionBarcodeDetailes
