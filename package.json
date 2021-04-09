@@ -2,7 +2,7 @@
     "name": "demo1",
     "version": "7.1.1",
     "private": true,
-    "homepage": "http://turalprocessing.asanito.com/",
+    "homepage": "http://healthesb.ir/",
     "scripts": {
         "start": "react-scripts start -o",
         "build": "react-scripts build",

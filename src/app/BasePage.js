@@ -87,10 +87,9 @@ export default function BasePage() {
               <Switch>
                 {
                     /* Redirect from root URL to /dashboard. */
-                    <Redirect exact from="/" to="/products/Categories"/>
+                    <ContentRoute exact from="/" component={UsersPage}></ContentRoute>
                 }
-                <ContentRoute path="/dashboard" component={DashboardPage}/>
-                <ContentRoute path="/builder" component={BuilderPage}/>
+
                 <ContentRoute path={PrescriptionBarcodeDetailesPath} component={PrescriptionBarcodeDetailes}></ContentRoute>
                 {/* <ContentRoute path={PrescriptionBarcodeDetailesPath} render={()=>
                   <Suspense fallback={<p>...loading</p>}>
@@ -105,12 +104,8 @@ export default function BasePage() {
                 <ContentRoute path={processListPath} component={ProcessPageList}></ContentRoute>
                 <ContentRoute path={processEditPath} component={ProcessEdit}></ContentRoute>
                 <ContentRoute path={ProcessPDFPath} component={ProcessPDF}></ContentRoute>
-      
+                <ContentRoute path={usersPath} component={UsersPage}></ContentRoute>
                 
-                <Route path="/google-material" component={GoogleMaterialPage}/>
-                <Route path="/react-bootstrap" component={ReactBootstrapPage}/>
-                <Route path="/e-commerce" component={ECommercePage}/>
-                <Redirect to="error/error-v1"/>
             </Switch>
         </Suspense>
     );

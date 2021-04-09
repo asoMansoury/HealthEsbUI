@@ -199,9 +199,9 @@ const headRows = [
       if (reduxProps.Is_Edited || reduxProps.Is_Deleted_One || reduxProps.Is_Added) {
         setIsEditingOrDeletingOneOrAdding(true);
         getData(rowsPerPage, page + 1, srchTitle, false, true, false);
-        props.notEdited();
-        props.notDeletedOne();
-        props.notAdded();
+        dispatch(Is_not_edited())
+        dispatch(Is_not_deleted_one())
+        dispatch(Is_not_added())
         if (reduxProps.Is_Deleted_One)
           setSelected([]);
       }
@@ -209,7 +209,7 @@ const headRows = [
         setIsDeletingGroup(true);
         setIsLoading(true);
         getData(rowsPerPage, 1, '', false, false, true);
-        props.notDeletedGroup();
+        dispatch(Is_not_deleted_group())
         setPage(0);
         setSelected([]);
       }
